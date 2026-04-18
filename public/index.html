@@ -1,793 +1,594 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pillar Park Chat</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0d0f14;
-      --surface: #13161e;
-      --surface2: #1a1e29;
-      --border: #252a38;
-      --accent: #25d366;
-      --accent2: #128c7e;
-      --text: #e8eaf0;
-      --muted: #6b7280;
-      --danger: #ef4444;
-      --sent: #1e3a2f;
-      --recv: #1a1e29;
+      --bg: #111b21;
+      --sidebar: #111b21;
+      --surface: #202c33;
+      --surface2: #2a3942;
+      --border: #2a3942;
+      --accent: #00a884;
+      --accent-dark: #008069;
+      --text: #e9edef;
+      --muted: #8696a0;
+      --sent-bg: #005c4b;
+      --recv-bg: #202c33;
+      --danger: #f15c6d;
+      --topbar: #202c33;
     }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-    body {
-      font-family: 'Syne', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 52px; background: var(--topbar); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .brand { font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+    .brand span { color: var(--text); }
+    .tabs { display: flex; gap: 4px; }
+    .tab { background: none; border: none; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; padding: 7px 16px; border-radius: 20px; cursor: pointer; transition: all 0.2s; }
+    .tab:hover { background: var(--surface2); color: var(--text); }
+    .tab.active { background: var(--accent); color: #fff; }
+    .online { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--accent); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
 
-    /* ── TOP BAR ── */
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      height: 56px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .topbar-brand {
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: var(--accent);
-    }
-    .topbar-brand span { color: var(--text); }
-    .topbar-tabs { display: flex; gap: 4px; }
-    .tab-btn {
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-family: 'Syne', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .tab-btn:hover { background: var(--surface2); color: var(--text); }
-    .tab-btn.active { background: var(--accent); color: #000; }
-    .status-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-    /* ── MAIN LAYOUT ── */
     .main { display: flex; flex: 1; overflow: hidden; }
-
-    /* ── PAGES ── */
     .page { display: none; flex: 1; overflow: hidden; }
     .page.active { display: flex; }
 
-    /* ══════════════════════════════
-       CHAT PAGE
-    ══════════════════════════════ */
-    .sidebar {
-      width: 300px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-    }
-    .sidebar-header {
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .sidebar-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-    .search-box {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--text);
-      font-family: 'Syne', sans-serif;
-      font-size: 13px;
-      width: 100%;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .search-box:focus { border-color: var(--accent); }
-    .search-box::placeholder { color: var(--muted); }
-
+    .sidebar { width: 360px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-top { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+    .sidebar-row { display: flex; align-items: center; justify-content: space-between; }
+    .sidebar-label { font-size: 18px; font-weight: 700; }
+    .refresh-btn { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: all .2s; }
+    .refresh-btn:hover { color: var(--accent); background: var(--surface2); }
+    .search-wrap { position: relative; }
+    .search { width: 100%; background: var(--surface); border: none; border-radius: 8px; padding: 8px 12px 8px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; }
+    .search::placeholder { color: var(--muted); }
     .conv-list { flex: 1; overflow-y: auto; }
-    .conv-item {
-      padding: 12px 16px;
-      cursor: pointer;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .conv-item:hover { background: var(--surface2); }
-    .conv-item.active { background: var(--surface2); border-left: 3px solid var(--accent); }
-    .avatar {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      background: var(--accent2);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 700; color: #fff;
-      flex-shrink: 0;
-    }
+    .conv-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid rgba(42,57,66,.5); transition: background .15s; }
+    .conv-item:hover { background: var(--surface); }
+    .conv-item.active { background: var(--surface2); }
+    .avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--accent-dark); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; flex-shrink: 0; }
     .conv-info { flex: 1; min-width: 0; }
-    .conv-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .conv-preview { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-    .conv-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-    .conv-time { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
-    .badge {
-      background: var(--accent);
-      color: #000;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-    }
-    .empty-list { padding: 40px 16px; text-align: center; color: var(--muted); font-size: 13px; }
+    .conv-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv-preview { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .conv-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+    .conv-time { font-size: 11px; color: var(--muted); }
+    .badge { background: var(--accent); color: #fff; border-radius: 10px; font-size: 11px; font-weight: 700; padding: 2px 7px; min-width: 20px; text-align: center; }
+    .empty { padding: 40px 16px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.6; }
 
-    /* ── CHAT AREA ── */
-    .chat-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .chat-header {
-      padding: 14px 20px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-    }
+    .chat-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
+    .chat-bg { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: var(--muted); }
+    .chat-bg-icon { font-size: 56px; opacity: .3; }
+
+    .chat-header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--topbar); border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .chat-header-info { flex: 1; }
-    .chat-header-name { font-size: 16px; font-weight: 700; }
-    .chat-header-phone { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .msg-row { display: flex; }
+    .chat-header-name { font-size: 16px; font-weight: 600; }
+    .chat-header-phone { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+    .messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 3px; }
+    .msg-row { display: flex; margin-bottom: 1px; }
     .msg-row.me { justify-content: flex-end; }
-    .msg-bubble {
-      max-width: 65%;
-      padding: 10px 14px;
-      border-radius: 14px;
-      font-size: 14px;
-      line-height: 1.5;
-      position: relative;
-    }
-    .msg-row.them .msg-bubble { background: var(--recv); border-top-left-radius: 4px; }
-    .msg-row.me .msg-bubble { background: var(--sent); border-top-right-radius: 4px; color: #d1fae5; }
-    .msg-time { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
-    .msg-status { font-size: 10px; color: var(--accent); }
+    .msg-bubble { max-width: 62%; padding: 8px 12px; border-radius: 8px; font-size: 14px; line-height: 1.5; word-break: break-word; }
+    .msg-row.them .msg-bubble { background: var(--recv-bg); border-top-left-radius: 2px; }
+    .msg-row.me .msg-bubble { background: var(--sent-bg); border-top-right-radius: 2px; }
+    .msg-footer { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 3px; }
+    .msg-time-txt { font-size: 11px; color: rgba(255,255,255,.4); }
+    .msg-tick { font-size: 13px; color: var(--accent); }
+    .msg-img { max-width: 100%; border-radius: 6px; display: block; margin-bottom: 4px; cursor: pointer; max-height: 280px; object-fit: cover; }
+    .msg-file-row { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.07); border-radius: 6px; padding: 8px 10px; margin-bottom: 4px; font-size: 13px; }
+    .msg-file-ico { font-size: 22px; }
 
-    .chat-input-area {
-      padding: 14px 20px;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      display: flex;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-    .msg-input {
-      flex: 1;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 14px;
-      color: var(--text);
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      outline: none;
-      resize: none;
-      height: 44px;
-      transition: border-color 0.2s;
-    }
-    .msg-input:focus { border-color: var(--accent); }
-    .send-btn {
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 10px;
-      padding: 0 20px;
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .send-btn:hover { opacity: 0.85; }
-    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .input-area { display: flex; align-items: flex-end; gap: 8px; padding: 10px 16px; background: var(--topbar); border-top: 1px solid var(--border); flex-shrink: 0; position: relative; }
+    .input-wrap { flex: 1; background: var(--surface); border-radius: 24px; display: flex; align-items: flex-end; padding: 8px 14px; gap: 8px; }
+    .icon-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); flex-shrink: 0; line-height: 1; padding: 1px; transition: color .2s; }
+    .icon-btn:hover { color: var(--accent); }
+    .msg-input { flex: 1; background: none; border: none; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; outline: none; resize: none; max-height: 120px; min-height: 22px; line-height: 1.5; }
+    .msg-input::placeholder { color: var(--muted); }
+    .send-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); border: none; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .2s; }
+    .send-btn:hover { background: var(--accent-dark); }
 
-    .no-chat {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: var(--muted);
-      gap: 12px;
-    }
-    .no-chat-icon { font-size: 48px; }
-    .no-chat-text { font-size: 15px; }
+    /* EMOJI PICKER */
+    .emoji-picker { position: absolute; bottom: 72px; left: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; width: 320px; z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,.5); display: none; }
+    .emoji-picker.open { display: block; }
+    .emoji-cats { display: flex; gap: 2px; margin-bottom: 10px; }
+    .emoji-cat { background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px 7px; border-radius: 8px; transition: background .15s; }
+    .emoji-cat:hover, .emoji-cat.active { background: var(--surface2); }
+    .emoji-search { width: 100%; background: var(--surface2); border: none; border-radius: 8px; padding: 7px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; margin-bottom: 10px; }
+    .emoji-search::placeholder { color: var(--muted); }
+    .emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; max-height: 200px; overflow-y: auto; }
+    .emoji-item { font-size: 22px; cursor: pointer; padding: 4px; border-radius: 6px; text-align: center; transition: background .1s; user-select: none; }
+    .emoji-item:hover { background: var(--surface2); }
 
-    /* ══════════════════════════════
-       BULK PAGE
-    ══════════════════════════════ */
-    .bulk-page {
-      flex: 1;
-      overflow-y: auto;
-      padding: 32px;
-      display: flex;
-      gap: 24px;
-    }
-    .bulk-left { flex: 1; display: flex; flex-direction: column; gap: 20px; }
-    .bulk-right { width: 320px; display: flex; flex-direction: column; gap: 20px; }
+    /* ATTACH MENU */
+    .attach-menu { position: absolute; bottom: 72px; left: 62px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 6px; z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,.5); display: none; flex-direction: column; gap: 2px; min-width: 180px; }
+    .attach-menu.open { display: flex; }
+    .attach-opt { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background .15s; }
+    .attach-opt:hover { background: var(--surface2); }
 
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-    }
-    .card-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 14px;
-    }
-    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    /* FILE PREVIEW */
+    .file-preview { background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; display: none; align-items: center; gap: 10px; }
+    .file-preview.show { display: flex; }
+    .fp-img { height: 48px; width: 48px; object-fit: cover; border-radius: 6px; }
+    .fp-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fp-remove { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; }
+    .fp-remove:hover { color: var(--danger); }
+
+    /* LIGHTBOX */
+    .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.92); z-index: 999; display: none; align-items: center; justify-content: center; }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+    .lb-close { position: absolute; top: 20px; right: 24px; background: none; border: none; color: #fff; font-size: 30px; cursor: pointer; }
+
+    /* BULK */
+    .bulk-wrap { flex: 1; overflow-y: auto; padding: 28px; display: flex; gap: 20px; }
+    .bulk-left { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+    .bulk-right { width: 300px; display: flex; flex-direction: column; gap: 16px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .card-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
     .form-label { font-size: 12px; font-weight: 600; color: var(--muted); }
-    .form-input, .form-select, .form-textarea {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: var(--text);
-      font-family: 'Syne', sans-serif;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.2s;
-      width: 100%;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
-    .form-textarea { resize: vertical; min-height: 100px; }
-    .form-select option { background: var(--surface2); }
-
-    .numbers-area {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      outline: none;
-      transition: border-color 0.2s;
-      width: 100%;
-      resize: vertical;
-      min-height: 140px;
-    }
+    .form-input, .form-textarea { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: border-color .2s; width: 100%; }
+    .form-input:focus, .form-textarea:focus { border-color: var(--accent); }
+    .form-textarea { resize: vertical; min-height: 90px; }
+    .numbers-area { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-family: monospace; font-size: 12px; outline: none; width: 100%; resize: vertical; min-height: 130px; }
     .numbers-area:focus { border-color: var(--accent); }
-
-    .btn {
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-family: 'Syne', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .btn-primary { background: var(--accent); color: #000; }
-    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-    .btn:hover { opacity: 0.85; }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .type-toggle { display: flex; background: var(--surface2); border-radius: 8px; padding: 3px; margin-bottom: 14px; gap: 3px; }
+    .type-btn { flex: 1; padding: 7px; border-radius: 6px; border: none; background: none; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .type-btn.active { background: var(--accent); color: #fff; }
+    .btn { border: none; border-radius: 8px; padding: 10px 18px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .2s; }
+    .btn-primary { background: var(--accent); color: #fff; }
     .btn-full { width: 100%; }
-
-    .msg-type-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
-    .type-btn {
-      flex: 1;
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--muted);
-      font-family: 'Syne', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-    .type-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-
-    .bulk-log {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--muted);
-      max-height: 200px;
-      overflow-y: auto;
-      line-height: 1.6;
-    }
-    .log-success { color: var(--accent); }
-    .log-error { color: var(--danger); }
-
-    .stat-row { display: flex; gap: 10px; }
-    .stat-box {
-      flex: 1;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      text-align: center;
-    }
-    .stat-num { font-size: 24px; font-weight: 800; color: var(--accent); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn:hover:not(:disabled) { opacity: .85; }
+    .stat-row { display: flex; gap: 8px; }
+    .stat-box { flex: 1; background: var(--surface2); border-radius: 8px; padding: 12px; text-align: center; }
+    .stat-num { font-size: 22px; font-weight: 800; color: var(--accent); }
     .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-    /* Template selector */
-    .template-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
-    .template-item {
-      padding: 10px 12px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      font-size: 13px;
-    }
+    .bulk-log { background: var(--surface2); border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11px; color: var(--muted); max-height: 180px; overflow-y: auto; line-height: 1.7; }
+    .log-ok { color: var(--accent); }
+    .log-err { color: var(--danger); }
+    .template-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
+    .template-item { padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: border-color .2s; }
     .template-item:hover { border-color: var(--accent); }
-    .template-item.selected { border-color: var(--accent); background: var(--sent); }
-    .template-name { font-weight: 600; }
-    .template-lang { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+    .template-item.selected { border-color: var(--accent); background: rgba(0,168,132,.1); }
+    .template-name { font-size: 13px; font-weight: 600; }
+    .template-lang { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-    /* scrollbar */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; font-size: 13px; z-index: 998; display: none; }
+    .toast.show { display: block; animation: fadeUp .3s; }
+    .toast.ok { border-color: var(--accent); color: var(--accent); }
+    .toast.err { border-color: var(--danger); color: var(--danger); }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-    .refresh-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      padding: 6px 12px;
-      font-family: 'Syne', sans-serif;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 18px;
-      font-size: 13px;
-      z-index: 999;
-      animation: slideIn 0.3s ease;
-      display: none;
-    }
-    .toast.show { display: block; }
-    .toast.success { border-color: var(--accent); color: var(--accent); }
-    .toast.error { border-color: var(--danger); color: var(--danger); }
-    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
 <div class="topbar">
-  <div class="topbar-brand">Pillar<span>Park</span></div>
-  <div class="topbar-tabs">
-    <button class="tab-btn active" onclick="switchTab('chat')">💬 Chats</button>
-    <button class="tab-btn" onclick="switchTab('bulk')">📤 Bulk Send</button>
+  <div class="brand">Pillar<span>Park</span></div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('chat',this)">💬 Chats</button>
+    <button class="tab" onclick="switchTab('bulk',this)">📤 Bulk Send</button>
   </div>
-  <div class="status-dot" title="Connected"></div>
+  <div class="online"><div class="dot"></div>Live</div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
-
-  <!-- ── CHAT PAGE ── -->
+  <!-- CHAT PAGE -->
   <div class="page active" id="page-chat">
-    <!-- Sidebar -->
     <div class="sidebar">
-      <div class="sidebar-header">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="sidebar-title">Conversations</div>
-          <button class="refresh-btn" onclick="loadConversations()">↻ Refresh</button>
+      <div class="sidebar-top">
+        <div class="sidebar-row">
+          <div class="sidebar-label">Chats</div>
+          <button class="refresh-btn" onclick="loadConvs()" title="Refresh">↻</button>
         </div>
-        <input class="search-box" type="text" placeholder="Search…" oninput="filterConvs(this.value)" />
+        <input class="search" type="text" placeholder="🔍  Search…" oninput="filterConvs(this.value)" />
       </div>
-      <div class="conv-list" id="conv-list">
-        <div class="empty-list">Loading conversations…</div>
-      </div>
+      <div class="conv-list" id="conv-list"><div class="empty">Loading…</div></div>
     </div>
-
-    <!-- Chat Area -->
     <div class="chat-area" id="chat-area">
-      <div class="no-chat">
-        <div class="no-chat-icon">💬</div>
-        <div class="no-chat-text">Select a conversation to start chatting</div>
+      <div class="chat-bg">
+        <div class="chat-bg-icon">💬</div>
+        <div>Select a conversation</div>
       </div>
     </div>
   </div>
 
-  <!-- ── BULK PAGE ── -->
+  <!-- BULK PAGE -->
   <div class="page" id="page-bulk">
-    <div class="bulk-page">
-
-      <!-- LEFT -->
+    <div class="bulk-wrap">
       <div class="bulk-left">
         <div class="card">
           <div class="card-title">Message Type</div>
-          <div class="msg-type-toggle">
-            <div class="type-btn active" id="type-text" onclick="setBulkType('text')">📝 Text</div>
-            <div class="type-btn" id="type-template" onclick="setBulkType('template')">📋 Template</div>
+          <div class="type-toggle">
+            <button class="type-btn active" id="tt-text" onclick="setBulkType('text')">📝 Text</button>
+            <button class="type-btn" id="tt-tpl" onclick="setBulkType('template')">📋 Template</button>
           </div>
-
-          <!-- Text message -->
-          <div id="bulk-text-section">
+          <div id="bulk-text-sec">
             <div class="form-group">
               <div class="form-label">Message</div>
-              <textarea class="form-textarea" id="bulk-message" placeholder="Type your message here…"></textarea>
+              <textarea class="form-textarea" id="bulk-msg" placeholder="Type your message…"></textarea>
             </div>
           </div>
-
-          <!-- Template section -->
-          <div id="bulk-template-section" style="display:none">
+          <div id="bulk-tpl-sec" style="display:none">
             <div class="form-group">
               <div class="form-label">Select Template</div>
-              <div class="template-list" id="template-list">
-                <div style="color:var(--muted);font-size:12px;">Loading templates…</div>
-              </div>
+              <div class="template-list" id="tpl-list"><div style="color:var(--muted);font-size:12px">Loading…</div></div>
             </div>
           </div>
         </div>
-
         <div class="card">
           <div class="card-title">Recipients</div>
           <div class="form-group">
-            <div class="form-label">Phone Numbers (one per line, with country code)</div>
-            <textarea class="numbers-area" id="bulk-numbers" placeholder="+995599123456&#10;+995555987654&#10;+44712345678"></textarea>
+            <div class="form-label">Phone numbers (one per line, with country code)</div>
+            <textarea class="numbers-area" id="bulk-numbers" placeholder="+995599123456&#10;+44712345678"></textarea>
           </div>
-          <div style="display:flex;gap:10px;align-items:center;">
-            <div class="form-group" style="flex:1;margin:0;">
-              <div class="form-label">Delay between messages (ms)</div>
-              <input class="form-input" type="number" id="bulk-delay" value="2000" min="500" />
-            </div>
+          <div class="form-group">
+            <div class="form-label">Delay between messages (ms)</div>
+            <input class="form-input" type="number" id="bulk-delay" value="2000" min="500" />
           </div>
         </div>
-
-        <button class="btn btn-primary btn-full" id="bulk-send-btn" onclick="startBulkSend()">
-          📤 Start Bulk Send
-        </button>
+        <button class="btn btn-primary btn-full" id="bulk-btn" onclick="startBulk()">📤 Start Bulk Send</button>
       </div>
-
-      <!-- RIGHT -->
       <div class="bulk-right">
         <div class="card">
           <div class="card-title">Stats</div>
           <div class="stat-row">
-            <div class="stat-box">
-              <div class="stat-num" id="stat-total">0</div>
-              <div class="stat-label">Total</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-num" id="stat-sent" style="color:var(--accent)">0</div>
-              <div class="stat-label">Sent</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-num" id="stat-failed" style="color:var(--danger)">0</div>
-              <div class="stat-label">Failed</div>
-            </div>
+            <div class="stat-box"><div class="stat-num" id="s-total">0</div><div class="stat-label">Total</div></div>
+            <div class="stat-box"><div class="stat-num" id="s-sent" style="color:var(--accent)">0</div><div class="stat-label">Sent</div></div>
+            <div class="stat-box"><div class="stat-num" id="s-fail" style="color:var(--danger)">0</div><div class="stat-label">Failed</div></div>
           </div>
         </div>
-
-        <div class="card" style="flex:1;">
+        <div class="card" style="flex:1">
           <div class="card-title">Log</div>
-          <div class="bulk-log" id="bulk-log">Waiting to start…</div>
+          <div class="bulk-log" id="bulk-log">Waiting…</div>
         </div>
       </div>
-
     </div>
   </div>
-
 </div>
 
-<!-- Toast -->
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLb()">
+  <button class="lb-close">✕</button>
+  <img id="lb-img" src="" onclick="event.stopPropagation()" />
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── State ──────────────────────────────────────────
-  let allConvs = [];
-  let activePhone = null;
-  let pollInterval = null;
-  let bulkType = 'text';
-  let selectedTemplate = null;
+// ── EMOJI DATA ────────────────────────────────────
+const ECATS = {
+  '😀':['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘','🥲','🙂','🤗','🤩','🤔','😐','😑','🙄','😏','😒','😔','😕','🙃','😲','😢','😭','😤','😠','😡','🤬','😷','🤒','🤕','🥴','😵','🤯','😇','🥳','🥺','😈','👿','💀','☠️','👻','👽','🤖','💩','🎃'],
+  '👍':['👍','👎','👌','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✋','🖐️','👋','🤚','🙌','👏','🤝','🙏','💪','✍️','🫶','🫂'],
+  '❤️':['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','🔥','✨','⭐','🌟','💫','💥','🎉','🎊','🎈','🎁','🏆','🥇'],
+  '🐶':['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🦆','🦅','🦉','🦇','🐺','🐴','🦄','🐝','🦋','🐢','🐍','🐙','🦑','🦐','🦀','🐬','🐳','🦈','🐊','🦒','🐘','🦁','🐕','🐈'],
+  '🍎':['🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥕','🌽','🍔','🍟','🍕','🌮','🌯','🍣','🍜','🍝','🍦','🍰','🎂','🍩','🍪','🍫','🍺','🍷','☕','🧃','🥤'],
+  '⚽':['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🎱','🏓','🏸','⛳','🎯','🎮','🎲','🎭','🎨','🎬','🎤','🎧','🎵','🎶','🎹','🥁','🎸','🎺','🎻'],
+  '🚗':['🚗','🚕','🚙','🚌','🏎️','🚓','🚑','🚒','🚐','🚚','🚲','🛵','🏍️','✈️','🚀','🛸','🚢','⛵','🚁','🌍','🗺️','🏔️','🏖️','🏠','🏢','🏰','🗼','🗽','⛪','🌆','🌃','🌉'],
+  '💡':['💡','🔦','💰','💳','📱','💻','🖥️','⌨️','🖨️','📷','📸','📹','🎥','📞','☎️','📺','📻','🔋','🔌','💾','💿','📀','🧲','🔧','🔨','⚙️','🔑','🗝️','🔒','🔓','📧','📨','📩','📬','📭','📮','📝','📖','📚','📎','✂️','🗑️']
+};
 
-  // ── Tab switching ──────────────────────────────────
-  function switchTab(tab) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('page-' + tab).classList.add('active');
-    event.target.classList.add('active');
-    if (tab === 'bulk') loadTemplates();
-  }
+const CAT_ICONS = Object.keys(ECATS);
+let currentCat = '😀', emojiQ = '', emojiOpen = false, attachOpen = false;
+let allConvs = [], activePhone = null, pollTimer = null;
+let bulkType = 'text', selTemplate = null, pendingFile = null;
 
-  // ── Toast ──────────────────────────────────────────
-  function showToast(msg, type = 'success') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast show ' + type;
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
+// ── TABS ──────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab === 'bulk') loadTemplates();
+}
 
-  // ── Format time ────────────────────────────────────
-  function fmtTime(iso) {
-    if (!iso) return '';
-    const d = new Date(iso);
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
+// ── TOAST ─────────────────────────────────────────
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show '+type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
 
-  // ── Load conversations ─────────────────────────────
-  async function loadConversations() {
-    try {
-      const res = await fetch('/api/conversations');
-      allConvs = await res.json();
-      renderConvList(allConvs);
-    } catch (e) {
-      document.getElementById('conv-list').innerHTML = '<div class="empty-list">Failed to load</div>';
-    }
-  }
+function fmtTime(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
 
-  function renderConvList(list) {
-    const el = document.getElementById('conv-list');
-    if (!list.length) {
-      el.innerHTML = '<div class="empty-list">No conversations yet.<br/>Messages will appear here when received.</div>';
-      return;
-    }
-    el.innerHTML = list.map(c => `
-      <div class="conv-item ${c.phone === activePhone ? 'active' : ''}" onclick="openConv('${c.phone}')">
-        <div class="avatar">${(c.name || c.phone)[0].toUpperCase()}</div>
-        <div class="conv-info">
-          <div class="conv-name">${c.name || c.phone}</div>
-          <div class="conv-preview">${c.lastMessage || 'No messages'}</div>
-        </div>
-        <div class="conv-meta">
-          <div class="conv-time">${fmtTime(c.lastTime)}</div>
-          ${c.unread ? `<div class="badge">${c.unread}</div>` : ''}
-        </div>
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── CONVERSATIONS ─────────────────────────────────
+async function loadConvs() {
+  try {
+    const r = await fetch('/api/conversations');
+    allConvs = await r.json();
+    renderConvs(allConvs);
+  } catch { document.getElementById('conv-list').innerHTML = '<div class="empty">Failed to load</div>'; }
+}
+
+function renderConvs(list) {
+  const el = document.getElementById('conv-list');
+  if (!list.length) { el.innerHTML = '<div class="empty">No conversations yet.<br/>Messages will appear here.</div>'; return; }
+  el.innerHTML = list.map(c => `
+    <div class="conv-item ${c.phone===activePhone?'active':''}" onclick="openConv('${c.phone}')">
+      <div class="avatar">${(c.name||c.phone)[0].toUpperCase()}</div>
+      <div class="conv-info">
+        <div class="conv-name">${esc(c.name||c.phone)}</div>
+        <div class="conv-preview">${esc(c.lastMessage||'No messages')}</div>
       </div>
-    `).join('');
-  }
-
-  function filterConvs(q) {
-    const filtered = allConvs.filter(c =>
-      (c.name || '').toLowerCase().includes(q.toLowerCase()) ||
-      (c.phone || '').includes(q)
-    );
-    renderConvList(filtered);
-  }
-
-  // ── Open conversation ──────────────────────────────
-  async function openConv(phone) {
-    activePhone = phone;
-    renderConvList(allConvs);
-
-    const area = document.getElementById('chat-area');
-    const conv = allConvs.find(c => c.phone === phone) || { phone, name: phone };
-
-    area.innerHTML = `
-      <div class="chat-header">
-        <div class="avatar">${(conv.name || phone)[0].toUpperCase()}</div>
-        <div class="chat-header-info">
-          <div class="chat-header-name">${conv.name || phone}</div>
-          <div class="chat-header-phone">${phone}</div>
-        </div>
+      <div class="conv-meta">
+        <div class="conv-time">${fmtTime(c.lastTime)}</div>
+        ${c.unread?`<div class="badge">${c.unread}</div>`:''}
       </div>
-      <div class="chat-messages" id="msg-list"></div>
-      <div class="chat-input-area">
-        <textarea class="msg-input" id="msg-input" placeholder="Type a message…" onkeydown="handleKey(event)"></textarea>
-        <button class="send-btn" onclick="sendMessage()">Send</button>
+    </div>`).join('');
+}
+
+function filterConvs(q) {
+  renderConvs(allConvs.filter(c =>
+    (c.name||'').toLowerCase().includes(q.toLowerCase()) || (c.phone||'').includes(q)));
+}
+
+// ── OPEN CONV ─────────────────────────────────────
+async function openConv(phone) {
+  activePhone = phone;
+  renderConvs(allConvs);
+  const conv = allConvs.find(c => c.phone===phone) || {phone, name:phone};
+
+  document.getElementById('chat-area').innerHTML = `
+    <div class="chat-header">
+      <div class="avatar">${(conv.name||phone)[0].toUpperCase()}</div>
+      <div class="chat-header-info">
+        <div class="chat-header-name">${esc(conv.name||phone)}</div>
+        <div class="chat-header-phone">${phone}</div>
       </div>
-    `;
+    </div>
+    <div class="messages" id="msg-list"></div>
+    <div class="file-preview" id="fp-bar">
+      <img id="fp-img" class="fp-img" src="" style="display:none" />
+      <div class="fp-name" id="fp-name"></div>
+      <button class="fp-remove" onclick="clearFile()">✕</button>
+    </div>
+    <div class="emoji-picker" id="ep">
+      <div class="emoji-cats" id="ep-cats"></div>
+      <input class="emoji-search" placeholder="Search emoji…" oninput="searchEmoji(this.value)" />
+      <div class="emoji-grid" id="ep-grid"></div>
+    </div>
+    <div class="attach-menu" id="am">
+      <div class="attach-opt" onclick="pickFile('image/*,video/*')">🖼️ &nbsp;Photo / Video</div>
+      <div class="attach-opt" onclick="pickFile('.pdf,.doc,.docx,.xls,.xlsx,.txt')">📄 &nbsp;Document</div>
+      <div class="attach-opt" onclick="pickFile('audio/*')">🎵 &nbsp;Audio</div>
+    </div>
+    <input type="file" id="fi" style="display:none" onchange="fileChosen(this)" />
+    <div class="input-area">
+      <div class="input-wrap">
+        <button class="icon-btn" onclick="toggleEmoji(event)" title="Emoji">😊</button>
+        <button class="icon-btn" onclick="toggleAttach(event)" title="Attach">📎</button>
+        <textarea class="msg-input" id="mi" placeholder="Type a message" rows="1"
+          oninput="autoH(this)" onkeydown="handleKey(event)"></textarea>
+      </div>
+      <button class="send-btn" onclick="sendMsg()">➤</button>
+    </div>`;
 
-    await loadMessages(phone);
+  buildEmojiUI();
+  await loadMsgs(phone);
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(() => loadMsgs(phone), 3000);
+  document.addEventListener('click', globalClick);
+}
 
-    if (pollInterval) clearInterval(pollInterval);
-    pollInterval = setInterval(() => loadMessages(phone), 3000);
-  }
+function autoH(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
 
-  async function loadMessages(phone) {
-    try {
-      const res = await fetch(`/api/conversations/${phone}`);
-      const data = await res.json();
-      const list = document.getElementById('msg-list');
-      if (!list) return;
+// ── EMOJI ─────────────────────────────────────────
+function buildEmojiUI() {
+  const cats = document.getElementById('ep-cats');
+  if (!cats) return;
+  cats.innerHTML = CAT_ICONS.map(k =>
+    `<button class="emoji-cat ${k===currentCat?'active':''}" onclick="setCat('${k}')">${k}</button>`).join('');
+  renderGrid();
+}
 
-      const wasAtBottom = list.scrollHeight - list.scrollTop <= list.clientHeight + 50;
+function setCat(c) {
+  currentCat = c; emojiQ = '';
+  const s = document.querySelector('.emoji-search'); if(s) s.value='';
+  document.querySelectorAll('.emoji-cat').forEach(b => b.classList.toggle('active', b.textContent===c));
+  renderGrid();
+}
 
-      list.innerHTML = data.messages.map(m => `
-        <div class="msg-row ${m.from === 'me' ? 'me' : 'them'}">
-          <div>
-            <div class="msg-bubble">${escHtml(m.text)}</div>
-            <div class="msg-time" style="text-align:${m.from === 'me' ? 'right' : 'left'}">
-              ${fmtTime(m.time)} ${m.from === 'me' && m.status ? `<span class="msg-status">· ${m.status}</span>` : ''}
-            </div>
-          </div>
-        </div>
-      `).join('');
+function searchEmoji(q) { emojiQ = q.toLowerCase(); renderGrid(); }
 
-      if (wasAtBottom) list.scrollTop = list.scrollHeight;
+function renderGrid() {
+  const g = document.getElementById('ep-grid');
+  if (!g) return;
+  const list = emojiQ
+    ? Object.values(ECATS).flat().filter((e,i,a)=>a.indexOf(e)===i)
+    : (ECATS[currentCat]||[]);
+  g.innerHTML = list.map(e => `<div class="emoji-item" onclick="insEmoji('${e}')">${e}</div>`).join('');
+}
 
-      // Update conv in allConvs
-      const idx = allConvs.findIndex(c => c.phone === phone);
-      if (idx >= 0) { allConvs[idx].unread = 0; renderConvList(allConvs); }
-    } catch (e) {}
-  }
+function insEmoji(e) {
+  const mi = document.getElementById('mi'); if(!mi) return;
+  const p = mi.selectionStart;
+  mi.value = mi.value.slice(0,p)+e+mi.value.slice(mi.selectionEnd);
+  mi.selectionStart = mi.selectionEnd = p+e.length;
+  mi.focus();
+}
 
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+function toggleEmoji(ev) { ev.stopPropagation(); emojiOpen=!emojiOpen; attachOpen=false; sync(); }
+function toggleAttach(ev) { ev.stopPropagation(); attachOpen=!attachOpen; emojiOpen=false; sync(); }
 
-  function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  }
+function sync() {
+  const ep=document.getElementById('ep'), am=document.getElementById('am');
+  if(ep) ep.classList.toggle('open',emojiOpen);
+  if(am) am.classList.toggle('open',attachOpen);
+}
 
-  async function sendMessage() {
-    const input = document.getElementById('msg-input');
-    const msg = input.value.trim();
-    if (!msg || !activePhone) return;
-    input.value = '';
+function globalClick(e) {
+  if(!e.target.closest('#ep') && !e.target.closest('.icon-btn')) { emojiOpen=false; }
+  if(!e.target.closest('#am') && !e.target.closest('.icon-btn')) { attachOpen=false; }
+  sync();
+}
 
-    try {
-      const res = await fetch('/api/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to: activePhone, message: msg, type: 'text' })
-      });
-      const data = await res.json();
-      if (data.error) { showToast(data.error, 'error'); return; }
-      await loadMessages(activePhone);
-      await loadConversations();
-    } catch (e) {
-      showToast('Failed to send', 'error');
-    }
-  }
+// ── FILE ──────────────────────────────────────────
+function pickFile(accept) {
+  const fi=document.getElementById('fi'); if(fi){fi.accept=accept;fi.click();}
+  attachOpen=false; sync();
+}
 
-  // ── Bulk send ──────────────────────────────────────
-  function setBulkType(type) {
-    bulkType = type;
-    document.getElementById('type-text').classList.toggle('active', type === 'text');
-    document.getElementById('type-template').classList.toggle('active', type === 'template');
-    document.getElementById('bulk-text-section').style.display = type === 'text' ? '' : 'none';
-    document.getElementById('bulk-template-section').style.display = type === 'template' ? '' : 'none';
-  }
+function fileChosen(input) {
+  const f=input.files[0]; if(!f) return;
+  pendingFile=f;
+  const bar=document.getElementById('fp-bar'), nm=document.getElementById('fp-name'), img=document.getElementById('fp-img');
+  if(!bar) return;
+  bar.classList.add('show');
+  nm.textContent=f.name+' ('+(f.size/1024).toFixed(1)+' KB)';
+  if(f.type.startsWith('image/')) { img.src=URL.createObjectURL(f); img.style.display=''; }
+  else img.style.display='none';
+}
 
-  async function loadTemplates() {
-    try {
-      const res = await fetch('/api/templates');
-      const templates = await res.json();
-      const el = document.getElementById('template-list');
-      if (!templates.length) {
-        el.innerHTML = '<div style="color:var(--muted);font-size:12px;">No approved templates found</div>';
-        return;
+function clearFile() {
+  pendingFile=null;
+  const bar=document.getElementById('fp-bar'), fi=document.getElementById('fi');
+  if(bar) bar.classList.remove('show');
+  if(fi) fi.value='';
+}
+
+// ── MESSAGES ──────────────────────────────────────
+async function loadMsgs(phone) {
+  try {
+    const r=await fetch(`/api/conversations/${phone}`);
+    const data=await r.json();
+    const list=document.getElementById('msg-list'); if(!list) return;
+    const atBot = list.scrollHeight-list.scrollTop <= list.clientHeight+60;
+    list.innerHTML=(data.messages||[]).map(m=>{
+      const me=m.from==='me';
+      let content='';
+      if(m.mediaUrl && m.mediaType==='image') {
+        content=`<img class="msg-img" src="${m.mediaUrl}" onclick="openLb('${m.mediaUrl}')" />`;
+      } else if(m.mediaUrl) {
+        content=`<div class="msg-file-row"><span class="msg-file-ico">📄</span><a href="${m.mediaUrl}" target="_blank" style="color:var(--accent);font-size:13px">${esc(m.text)}</a></div>`;
+      } else {
+        content=`<div>${esc(m.text)}</div>`;
       }
-      el.innerHTML = templates.map(t => `
-        <div class="template-item" onclick="selectTemplate('${t.name}','${t.language || 'en_US'}',this)">
-          <div class="template-name">${t.name}</div>
-          <div class="template-lang">${t.language || 'en_US'}</div>
-        </div>
-      `).join('');
-    } catch (e) {}
-  }
+      const tick = me ? (m.status==='read'?'<span class="msg-tick" style="color:#53bdeb">✓✓</span>':m.status==='delivered'?'<span class="msg-tick">✓✓</span>':'<span class="msg-tick" style="color:var(--muted)">✓</span>') : '';
+      return `<div class="msg-row ${me?'me':'them'}">
+        <div class="msg-bubble">${content}
+          <div class="msg-footer"><span class="msg-time-txt">${fmtTime(m.time)}</span>${tick}</div>
+        </div></div>`;
+    }).join('');
+    if(atBot) list.scrollTop=list.scrollHeight;
+    const idx=allConvs.findIndex(c=>c.phone===phone);
+    if(idx>=0){allConvs[idx].unread=0;renderConvs(allConvs);}
+  } catch {}
+}
 
-  function selectTemplate(name, lang, el) {
-    selectedTemplate = { name, lang };
-    document.querySelectorAll('.template-item').forEach(i => i.classList.remove('selected'));
-    el.classList.add('selected');
-  }
+function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} }
 
-  async function startBulkSend() {
-    const numbersRaw = document.getElementById('bulk-numbers').value.trim();
-    const numbers = numbersRaw.split('\n').map(n => n.trim()).filter(Boolean);
-    if (!numbers.length) { showToast('Add at least one number', 'error'); return; }
+async function sendMsg() {
+  if(!activePhone) return;
+  if(pendingFile) { await sendFile(); return; }
+  const mi=document.getElementById('mi'); if(!mi) return;
+  const msg=mi.value.trim(); if(!msg) return;
+  mi.value=''; mi.style.height='auto';
+  try {
+    const r=await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({to:activePhone,message:msg,type:'text'})});
+    const d=await r.json();
+    if(d.error){toast(d.error,'err');return;}
+    await loadMsgs(activePhone); loadConvs();
+  } catch { toast('Failed to send','err'); }
+}
 
-    const message = document.getElementById('bulk-message').value.trim();
-    const delay = parseInt(document.getElementById('bulk-delay').value) || 2000;
+async function sendFile() {
+  if(!pendingFile||!activePhone) return;
+  const fd=new FormData();
+  fd.append('file',pendingFile);
+  fd.append('to',activePhone);
+  try {
+    const r=await fetch('/api/send-media',{method:'POST',body:fd});
+    const d=await r.json();
+    if(d.error){toast(d.error,'err');return;}
+    clearFile(); await loadMsgs(activePhone); loadConvs();
+  } catch { toast('Failed to send file','err'); }
+}
 
-    if (bulkType === 'text' && !message) { showToast('Enter a message', 'error'); return; }
-    if (bulkType === 'template' && !selectedTemplate) { showToast('Select a template', 'error'); return; }
+// ── LIGHTBOX ──────────────────────────────────────
+function openLb(url){document.getElementById('lb-img').src=url;document.getElementById('lightbox').classList.add('open');}
+function closeLb(){document.getElementById('lightbox').classList.remove('open');}
 
-    const btn = document.getElementById('bulk-send-btn');
-    btn.disabled = true;
-    btn.textContent = '⏳ Sending…';
+// ── BULK ──────────────────────────────────────────
+function setBulkType(t) {
+  bulkType=t;
+  document.getElementById('tt-text').classList.toggle('active',t==='text');
+  document.getElementById('tt-tpl').classList.toggle('active',t==='template');
+  document.getElementById('bulk-text-sec').style.display=t==='text'?'':'none';
+  document.getElementById('bulk-tpl-sec').style.display=t==='template'?'':'none';
+}
 
-    document.getElementById('stat-total').textContent = numbers.length;
-    document.getElementById('stat-sent').textContent = '0';
-    document.getElementById('stat-failed').textContent = '0';
-    const log = document.getElementById('bulk-log');
-    log.innerHTML = '';
+async function loadTemplates() {
+  try {
+    const r=await fetch('/api/templates'); const tpls=await r.json();
+    const el=document.getElementById('tpl-list');
+    if(!tpls.length){el.innerHTML='<div style="color:var(--muted);font-size:12px">No approved templates</div>';return;}
+    el.innerHTML=tpls.map(t=>`
+      <div class="template-item" onclick="selTpl('${t.name}','${t.language||'en_US'}',this)">
+        <div class="template-name">${esc(t.name)}</div>
+        <div class="template-lang">${t.language||'en_US'}</div>
+      </div>`).join('');
+  } catch {}
+}
 
-    let sent = 0, failed = 0;
+function selTpl(name,lang,el) {
+  selTemplate={name,lang};
+  document.querySelectorAll('.template-item').forEach(i=>i.classList.remove('selected'));
+  el.classList.add('selected');
+}
 
-    for (const number of numbers) {
-      try {
-        const body = {
-          to: number,
-          type: bulkType,
-          delay,
-          ...(bulkType === 'text' ? { message } : { templateName: selectedTemplate.name, templateLang: selectedTemplate.lang })
-        };
-        const res = await fetch('/api/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        sent++;
-        document.getElementById('stat-sent').textContent = sent;
-        log.innerHTML += `<div class="log-success">✓ ${number}</div>`;
-      } catch (e) {
-        failed++;
-        document.getElementById('stat-failed').textContent = failed;
-        log.innerHTML += `<div class="log-error">✗ ${number}: ${e.message}</div>`;
-      }
-      log.scrollTop = log.scrollHeight;
-      await new Promise(r => setTimeout(r, delay));
+async function startBulk() {
+  const numbers=document.getElementById('bulk-numbers').value.trim().split('\n').map(n=>n.trim()).filter(Boolean);
+  if(!numbers.length){toast('Add at least one number','err');return;}
+  const msg=document.getElementById('bulk-msg').value.trim();
+  const delay=parseInt(document.getElementById('bulk-delay').value)||2000;
+  if(bulkType==='text'&&!msg){toast('Enter a message','err');return;}
+  if(bulkType==='template'&&!selTemplate){toast('Select a template','err');return;}
+  const btn=document.getElementById('bulk-btn');
+  btn.disabled=true; btn.textContent='⏳ Sending…';
+  document.getElementById('s-total').textContent=numbers.length;
+  document.getElementById('s-sent').textContent='0';
+  document.getElementById('s-fail').textContent='0';
+  const log=document.getElementById('bulk-log'); log.innerHTML='';
+  let sent=0,failed=0;
+  for(const num of numbers){
+    try{
+      const body={to:num,type:bulkType,delay,...(bulkType==='text'?{message:msg}:{templateName:selTemplate.name,templateLang:selTemplate.lang})};
+      const r=await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const d=await r.json(); if(d.error) throw new Error(d.error);
+      sent++; document.getElementById('s-sent').textContent=sent;
+      log.innerHTML+=`<div class="log-ok">✓ ${num}</div>`;
+    }catch(e){
+      failed++; document.getElementById('s-fail').textContent=failed;
+      log.innerHTML+=`<div class="log-err">✗ ${num}: ${e.message}</div>`;
     }
-
-    btn.disabled = false;
-    btn.textContent = '📤 Start Bulk Send';
-    showToast(`Done! ${sent} sent, ${failed} failed`);
+    log.scrollTop=log.scrollHeight;
+    await new Promise(r=>setTimeout(r,delay));
   }
+  btn.disabled=false; btn.textContent='📤 Start Bulk Send';
+  toast(`Done! ${sent} sent, ${failed} failed`);
+}
 
+loadConvs();
+setInterval(loadConvs,5000);
+</script>
+</body>
+</html>
   // ── Init ───────────────────────────────────────────
   loadConversations();
   setInterval(loadConversations, 5000);
