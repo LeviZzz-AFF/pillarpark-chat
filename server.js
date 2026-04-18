@@ -2,13 +2,17 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
+const multer = require('multer');
+const FormData = require('form-data');
+const fs = require('fs');
 
 const app = express();
+const upload = multer({ dest: 'uploads/' });
+
 app.use(express.json());
 app.use(express.static('public'));
 
 // ── In-memory message store ──────────────────────────────────
-// Stores all conversations: { phoneNumber: { name, messages: [] } }
 const conversations = {};
 
 function getOrCreate(phone, name) {
@@ -49,7 +53,6 @@ app.post('/webhook', async (req, res) => {
     for (const change of entry.changes || []) {
       const value = change.value;
 
-      // Incoming messages
       if (value.messages) {
         for (const msg of value.messages) {
           const phone = msg.from;
@@ -58,37 +61,60 @@ app.post('/webhook', async (req, res) => {
           const conv = getOrCreate(phone, name);
 
           let text = '';
-          if (msg.type === 'text') text = msg.text?.body || '';
-          else if (msg.type === 'image') text = '📷 Image';
-          else if (msg.type === 'audio') text = '🎵 Audio';
-          else if (msg.type === 'video') text = '🎥 Video';
-          else if (msg.type === 'document') text = '📄 Document';
-          else text = `[${msg.type}]`;
+          let mediaUrl = null;
+          let mediaType = null;
+
+          if (msg.type === 'text') {
+            text = msg.text?.body || '';
+          } else if (msg.type === 'image') {
+            text = '📷 Image';
+            mediaType = 'image';
+            try {
+              const mediaId = msg.image?.id;
+              if (mediaId) {
+                const mediaInfo = await axios.get(`https://graph.facebook.com/v22.0/${mediaId}`, {
+                  headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` }
+                });
+                mediaUrl = mediaInfo.data.url;
+              }
+            } catch (e) {}
+          } else if (msg.type === 'audio') {
+            text = '🎵 Audio';
+            mediaType = 'audio';
+          } else if (msg.type === 'video') {
+            text = '🎥 Video';
+            mediaType = 'video';
+          } else if (msg.type === 'document') {
+            text = msg.document?.filename || '📄 Document';
+            mediaType = 'document';
+          } else if (msg.type === 'sticker') {
+            text = '🎨 Sticker';
+          } else {
+            text = `[${msg.type}]`;
+          }
 
           conv.messages.push({
             id: msg.id,
             from: 'them',
             text,
             type: msg.type,
+            mediaUrl,
+            mediaType,
             time: new Date(parseInt(msg.timestamp) * 1000).toISOString()
           });
           conv.unread++;
           conv.lastMessage = text;
           conv.lastTime = new Date(parseInt(msg.timestamp) * 1000).toISOString();
-
           console.log(`📩 ${name} (${phone}): ${text}`);
 
-          // Mark as read
           try {
             await WA.post('/messages', { messaging_product: 'whatsapp', status: 'read', message_id: msg.id });
           } catch (e) {}
         }
       }
 
-      // Status updates
       if (value.statuses) {
         for (const status of value.statuses) {
-          // Update message status in conversation
           for (const conv of Object.values(conversations)) {
             const msg = conv.messages.find(m => m.id === status.id);
             if (msg) msg.status = status.status;
@@ -110,11 +136,11 @@ app.get('/api/conversations', (req, res) => {
 app.get('/api/conversations/:phone', (req, res) => {
   const conv = conversations[req.params.phone];
   if (!conv) return res.json({ phone: req.params.phone, messages: [], unread: 0 });
-  conv.unread = 0; // mark as read
+  conv.unread = 0;
   res.json(conv);
 });
 
-// ── API: Send a message ───────────────────────────────────────
+// ── API: Send a text/template message ────────────────────────
 app.post('/api/send', async (req, res) => {
   const { to, message, type, templateName, templateLang } = req.body;
   if (!to) return res.status(400).json({ error: 'Missing recipient' });
@@ -124,7 +150,7 @@ app.post('/api/send', async (req, res) => {
     if (type === 'template') {
       payload = {
         messaging_product: 'whatsapp',
-        to: to.replace('+', ''),
+        to: to.replace('+', '').replace(/\s/g, ''),
         type: 'template',
         template: { name: templateName, language: { code: templateLang || 'en_US' } }
       };
@@ -132,7 +158,7 @@ app.post('/api/send', async (req, res) => {
       payload = {
         messaging_product: 'whatsapp',
         recipient_type: 'individual',
-        to: to.replace('+', ''),
+        to: to.replace('+', '').replace(/\s/g, ''),
         type: 'text',
         text: { preview_url: false, body: message }
       };
@@ -141,23 +167,75 @@ app.post('/api/send', async (req, res) => {
     const result = await WA.post('/messages', payload);
     const msgId = result.data?.messages?.[0]?.id;
 
-    // Save to conversation
-    const conv = getOrCreate(to.replace('+', ''), to);
+    const conv = getOrCreate(to.replace('+', '').replace(/\s/g, ''), to);
     const text = type === 'template' ? `[Template: ${templateName}]` : message;
-    conv.messages.push({
-      id: msgId,
-      from: 'me',
-      text,
-      status: 'sent',
-      time: new Date().toISOString()
-    });
+    conv.messages.push({ id: msgId, from: 'me', text, status: 'sent', time: new Date().toISOString() });
     conv.lastMessage = text;
     conv.lastTime = new Date().toISOString();
 
     res.json({ success: true, messageId: msgId });
   } catch (err) {
-    const errMsg = err.response?.data?.error?.message || err.message;
-    res.status(500).json({ error: errMsg });
+    res.status(500).json({ error: err.response?.data?.error?.message || err.message });
+  }
+});
+
+// ── API: Send media ───────────────────────────────────────────
+app.post('/api/send-media', upload.single('file'), async (req, res) => {
+  const { to } = req.body;
+  if (!to || !req.file) return res.status(400).json({ error: 'Missing recipient or file' });
+
+  const toClean = to.replace('+', '').replace(/\s/g, '');
+  const file = req.file;
+  const mimeType = file.mimetype;
+
+  try {
+    // Step 1: Upload media to WhatsApp
+    const form = new FormData();
+    form.append('file', fs.createReadStream(file.path), {
+      filename: file.originalname || 'file',
+      contentType: mimeType
+    });
+    form.append('messaging_product', 'whatsapp');
+
+    const uploadRes = await axios.post(
+      `https://graph.facebook.com/v22.0/${process.env.PHONE_NUMBER_ID}/media`,
+      form,
+      { headers: { ...form.getHeaders(), Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` } }
+    );
+    const mediaId = uploadRes.data.id;
+
+    // Step 2: Determine media type
+    let waType = 'document';
+    if (mimeType.startsWith('image/')) waType = 'image';
+    else if (mimeType.startsWith('video/')) waType = 'video';
+    else if (mimeType.startsWith('audio/')) waType = 'audio';
+
+    // Step 3: Send message
+    const payload = {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: toClean,
+      type: waType,
+      [waType]: { id: mediaId }
+    };
+    if (waType === 'document') payload.document.filename = file.originalname;
+
+    const sendRes = await WA.post('/messages', payload);
+    const msgId = sendRes.data?.messages?.[0]?.id;
+
+    const conv = getOrCreate(toClean, to);
+    const text = waType === 'image' ? '📷 Image' : waType === 'video' ? '🎥 Video' : waType === 'audio' ? '🎵 Audio' : `📄 ${file.originalname}`;
+    conv.messages.push({ id: msgId, from: 'me', text, mediaType: waType, status: 'sent', time: new Date().toISOString() });
+    conv.lastMessage = text;
+    conv.lastTime = new Date().toISOString();
+
+    // Clean up temp file
+    fs.unlink(file.path, () => {});
+
+    res.json({ success: true, messageId: msgId });
+  } catch (err) {
+    fs.unlink(file.path, () => {});
+    res.status(500).json({ error: err.response?.data?.error?.message || err.message });
   }
 });
 
@@ -181,10 +259,8 @@ app.get('/api/templates', async (req, res) => {
 app.post('/api/bulk', async (req, res) => {
   const { numbers, message, type, templateName, templateLang, delay } = req.body;
   if (!numbers || numbers.length === 0) return res.status(400).json({ error: 'No numbers' });
-
   res.json({ success: true, total: numbers.length, message: 'Bulk send started' });
 
-  // Send in background
   for (const number of numbers) {
     try {
       const to = number.replace('+', '').replace(/\s/g, '');
