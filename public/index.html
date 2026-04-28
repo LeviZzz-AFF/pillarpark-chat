@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Pillar Park Chat</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -22,33 +22,32 @@
       --sent-bg: #005c4b;
       --recv-bg: #202c33;
       --danger: #f15c6d;
-      --chat-bg: #0b141a;
     }
-    html, body { height: 100%; overflow: hidden; }
+    html, body { height: 100%; height: 100dvh; overflow: hidden; }
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
 
-    /* TOPBAR */
-    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 50px; background: var(--header-bg); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 10; }
-    .brand { font-size: 19px; font-weight: 700; color: var(--accent); letter-spacing: -0.3px; }
+    /* ── TOPBAR ── */
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 50px; background: var(--header-bg); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 10; }
+    .brand { font-size: 18px; font-weight: 700; color: var(--accent); }
     .brand span { color: var(--text); }
-    .tabs { display: flex; gap: 4px; }
-    .tab { background: none; border: none; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 20px; cursor: pointer; transition: all 0.18s; }
+    .tabs { display: flex; gap: 3px; }
+    .tab { background: none; border: none; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
     .tab:hover { background: var(--surface2); color: var(--text); }
     .tab.active { background: var(--accent); color: #fff; }
-    .online { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--accent); font-weight: 500; }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: blink 2s infinite; }
+    .online { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--accent); font-weight: 500; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: blink 2s infinite; flex-shrink: 0; }
     @keyframes blink { 0%,100%{opacity:1}50%{opacity:.3} }
 
-    /* LAYOUT */
+    /* ── LAYOUT ── */
     .main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
     .page { display: none; flex: 1; overflow: hidden; min-height: 0; }
     .page.active { display: flex; }
 
-    /* ═══════════════════════════════════════
+    /* ══════════════════════════════════
        SIDEBAR
-    ═══════════════════════════════════════ */
-    .sidebar { width: 380px; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
-    .sidebar-head { padding: 10px 16px 8px; border-bottom: 1px solid var(--border); }
+    ══════════════════════════════════ */
+    .sidebar { width: 360px; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; transition: transform .25s; }
+    .sidebar-head { padding: 10px 14px 8px; border-bottom: 1px solid var(--border); }
     .sidebar-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .sidebar-title { font-size: 20px; font-weight: 700; }
     .icon-round { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 6px; border-radius: 50%; transition: all .18s; }
@@ -56,205 +55,147 @@
     .search-bar { display: flex; align-items: center; background: var(--surface2); border-radius: 8px; padding: 7px 12px; gap: 8px; }
     .search-bar input { background: none; border: none; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; flex: 1; }
     .search-bar input::placeholder { color: var(--muted); }
-    .search-icon { color: var(--muted); font-size: 14px; }
-    .conv-list { flex: 1; overflow-y: auto; }
-    .conv-item { display: flex; align-items: center; gap: 13px; padding: 10px 16px; cursor: pointer; border-bottom: 1px solid rgba(42,57,66,.4); transition: background .12s; position: relative; }
-    .conv-item:hover { background: rgba(42,57,66,.5); }
+    .conv-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .conv-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid rgba(42,57,66,.4); transition: background .12s; }
+    .conv-item:hover, .conv-item:active { background: rgba(42,57,66,.5); }
     .conv-item.active { background: var(--surface2); }
-    .avatar { width: 49px; height: 49px; border-radius: 50%; background: #536471; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 600; flex-shrink: 0; color: #fff; }
+    .avatar { width: 46px; height: 46px; border-radius: 50%; background: #536471; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; flex-shrink: 0; color: #fff; }
     .conv-info { flex: 1; min-width: 0; }
-    .conv-name { font-size: 16px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv-name { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .conv-preview { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
     .conv-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
-    .conv-time { font-size: 12px; color: var(--muted); }
+    .conv-time { font-size: 11px; color: var(--muted); }
     .unread-badge { background: var(--accent); color: #fff; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
     .empty-state { padding: 50px 20px; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.7; }
 
-    /* ═══════════════════════════════════════
+    /* ══════════════════════════════════
        CHAT AREA
-    ═══════════════════════════════════════ */
-    .chat-area { flex: 1; display: flex; flex-direction: column; background: var(--chat-bg); overflow: hidden; min-height: 0; position: relative; }
+    ══════════════════════════════════ */
+    .chat-area { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; min-height: 0; position: relative; }
+    .chat-welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--muted); padding: 20px; text-align: center; }
+    .chat-welcome-icon { font-size: 60px; opacity: .15; }
+    .chat-welcome h2 { font-size: 26px; font-weight: 300; color: var(--text); opacity: .7; }
+    .chat-welcome p { font-size: 13px; opacity: .6; max-width: 280px; line-height: 1.6; }
 
-    /* Welcome screen */
-    .chat-welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: var(--muted); border-left: 1px solid var(--border); }
-    .chat-welcome-icon { font-size: 72px; opacity: .15; }
-    .chat-welcome h2 { font-size: 30px; font-weight: 300; color: var(--text); opacity: .7; }
-    .chat-welcome p { font-size: 14px; opacity: .6; text-align: center; max-width: 320px; line-height: 1.6; }
-
-    /* Chat header */
-    .chat-header { display: flex; align-items: center; gap: 13px; padding: 9px 16px; background: var(--header-bg); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .chat-header-info { flex: 1; }
-    .chat-header-name { font-size: 16px; font-weight: 600; line-height: 1.3; }
+    .chat-header { display: flex; align-items: center; gap: 11px; padding: 9px 14px; background: var(--header-bg); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .back-btn { display: none; background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; padding: 4px; margin-right: 2px; }
+    .chat-header-info { flex: 1; min-width: 0; }
+    .chat-header-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .chat-header-sub { font-size: 12px; color: var(--muted); }
 
-    /* Messages */
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px 6%;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      background-color: var(--chat-bg);
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    }
-
-    /* Date divider */
-    .date-divider { display: flex; align-items: center; justify-content: center; margin: 12px 0 8px; }
+    .messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 10px 5%; display: flex; flex-direction: column; gap: 2px; background-color: var(--bg); }
+    .date-divider { display: flex; align-items: center; justify-content: center; margin: 10px 0 6px; }
     .date-divider span { background: rgba(17,27,33,.85); border: 1px solid rgba(255,255,255,.08); color: var(--muted); font-size: 12px; padding: 4px 12px; border-radius: 7px; }
-
     .msg-row { display: flex; margin-bottom: 1px; }
     .msg-row.me { justify-content: flex-end; }
-    .msg-row.them { justify-content: flex-start; }
-
-    .msg-bubble {
-      max-width: 58%;
-      min-width: 80px;
-      padding: 6px 9px 6px 9px;
-      border-radius: 7.5px;
-      font-size: 14.2px;
-      line-height: 1.45;
-      word-break: break-word;
-      position: relative;
-      box-shadow: 0 1px 2px rgba(0,0,0,.25);
-    }
+    .msg-bubble { max-width: 72%; min-width: 70px; padding: 6px 8px 4px; border-radius: 7.5px; font-size: 14px; line-height: 1.45; word-break: break-word; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
     .msg-row.them .msg-bubble { background: var(--recv-bg); border-top-left-radius: 0; }
     .msg-row.me .msg-bubble { background: var(--sent-bg); border-top-right-radius: 0; }
-
-    /* tail */
-    .msg-row.them .msg-bubble::before {
-      content: '';
-      position: absolute;
-      left: -8px; top: 0;
-      border: 8px solid transparent;
-      border-right-color: var(--recv-bg);
-      border-top-color: var(--recv-bg);
-    }
-    .msg-row.me .msg-bubble::after {
-      content: '';
-      position: absolute;
-      right: -8px; top: 0;
-      border: 8px solid transparent;
-      border-left-color: var(--sent-bg);
-      border-top-color: var(--sent-bg);
-    }
-
-    .msg-text { display: inline; }
-    .msg-footer { display: flex; align-items: center; justify-content: flex-end; gap: 3px; margin-top: 2px; float: right; margin-left: 8px; }
-    .msg-time { font-size: 11px; color: rgba(255,255,255,.45); white-space: nowrap; }
-    .msg-tick { font-size: 14px; line-height: 1; }
-    .tick-sent { color: rgba(255,255,255,.45); }
-    .tick-delivered { color: rgba(255,255,255,.45); }
+    .msg-row.them .msg-bubble::before { content:''; position:absolute; left:-7px; top:0; border:7px solid transparent; border-right-color:var(--recv-bg); border-top-color:var(--recv-bg); }
+    .msg-row.me .msg-bubble::after { content:''; position:absolute; right:-7px; top:0; border:7px solid transparent; border-left-color:var(--sent-bg); border-top-color:var(--sent-bg); }
+    .msg-footer { display: flex; align-items: center; justify-content: flex-end; gap: 3px; margin-top: 2px; float: right; margin-left: 6px; }
+    .msg-time { font-size: 11px; color: rgba(255,255,255,.4); white-space: nowrap; }
+    .msg-tick { font-size: 13px; }
+    .tick-sent { color: rgba(255,255,255,.4); }
+    .tick-delivered { color: rgba(255,255,255,.4); }
     .tick-read { color: #53bdeb; }
-
-    .msg-img { max-width: 100%; max-height: 260px; border-radius: 5px; display: block; cursor: pointer; margin-bottom: 4px; object-fit: cover; }
-    .msg-file-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.06); border-radius: 5px; padding: 8px 10px; margin-bottom: 4px; }
-    .msg-file-icon { font-size: 26px; }
+    .msg-img { max-width: 100%; max-height: 220px; border-radius: 5px; display: block; cursor: pointer; margin-bottom: 3px; object-fit: cover; }
+    .msg-file-row { display: flex; align-items: center; gap: 9px; background: rgba(255,255,255,.06); border-radius: 5px; padding: 7px 9px; margin-bottom: 3px; }
     .msg-file-name { font-size: 13px; color: var(--accent); text-decoration: none; }
-    .msg-file-name:hover { text-decoration: underline; }
 
-    /* INPUT AREA */
+    /* ── INPUT SECTION ── */
     .input-section { flex-shrink: 0; background: var(--header-bg); border-top: 1px solid var(--border); position: relative; }
-
-    /* File preview */
-    .file-preview { display: none; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .file-preview { display: none; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--border); background: var(--surface); }
     .file-preview.show { display: flex; }
-    .fp-thumb { width: 46px; height: 46px; border-radius: 6px; object-fit: cover; }
+    .fp-thumb { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; }
     .fp-info { flex: 1; min-width: 0; }
     .fp-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .fp-size { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .fp-remove { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 4px; }
-    .fp-remove:hover { color: var(--danger); }
+    .fp-remove { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; }
 
-    /* Emoji picker — positioned above emoji button */
-    .emoji-picker {
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 12px;
-      width: 330px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      box-shadow: 0 8px 30px rgba(0,0,0,.5);
-      z-index: 200;
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    /* Emoji picker — above emoji button */
+    .emoji-picker { position: absolute; bottom: calc(100% + 6px); left: 10px; width: min(330px, calc(100vw - 20px)); background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,.5); z-index: 200; display: none; flex-direction: column; overflow: hidden; }
     .emoji-picker.open { display: flex; }
-    .ep-top { padding: 10px 10px 6px; }
-    .ep-cats { display: flex; gap: 2px; margin-bottom: 8px; overflow-x: auto; }
+    .ep-top { padding: 9px 9px 6px; }
+    .ep-cats { display: flex; gap: 1px; margin-bottom: 7px; overflow-x: auto; }
     .ep-cats::-webkit-scrollbar { display: none; }
-    .ep-cat { background: none; border: none; font-size: 20px; padding: 5px 7px; border-radius: 8px; cursor: pointer; transition: background .12s; flex-shrink: 0; }
+    .ep-cat { background: none; border: none; font-size: 19px; padding: 5px 6px; border-radius: 7px; cursor: pointer; transition: background .12s; flex-shrink: 0; }
     .ep-cat:hover, .ep-cat.active { background: var(--surface2); }
-    .ep-search { width: 100%; background: var(--surface2); border: none; border-radius: 8px; padding: 7px 11px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; }
+    .ep-search { width: 100%; background: var(--surface2); border: none; border-radius: 8px; padding: 7px 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; }
     .ep-search::placeholder { color: var(--muted); }
-    .ep-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 1px; max-height: 210px; overflow-y: auto; padding: 6px 10px 10px; }
-    .ep-item { font-size: 24px; text-align: center; padding: 4px; border-radius: 7px; cursor: pointer; transition: background .1s; user-select: none; }
+    .ep-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 1px; max-height: 190px; overflow-y: auto; padding: 5px 9px 9px; }
+    .ep-item { font-size: 22px; text-align: center; padding: 4px; border-radius: 6px; cursor: pointer; transition: background .1s; user-select: none; }
     .ep-item:hover { background: var(--surface2); }
 
     /* Attach menu */
-    .attach-menu {
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 52px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,.5);
-      z-index: 200;
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-      min-width: 190px;
-    }
+    .attach-menu { position: absolute; bottom: calc(100% + 6px); left: 48px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.5); z-index: 200; display: none; flex-direction: column; overflow: hidden; min-width: 180px; }
     .attach-menu.open { display: flex; }
-    .attach-opt { display: flex; align-items: center; gap: 12px; padding: 11px 16px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background .12s; }
-    .attach-opt:hover { background: var(--surface2); }
-    .attach-opt-icon { font-size: 22px; }
+    .attach-opt { display: flex; align-items: center; gap: 11px; padding: 11px 16px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background .12s; }
+    .attach-opt:hover, .attach-opt:active { background: var(--surface2); }
+    .attach-opt-icon { font-size: 20px; }
 
-    /* Input row */
-    .input-row { display: flex; align-items: flex-end; gap: 8px; padding: 8px 12px; }
-    .input-box { flex: 1; display: flex; align-items: flex-end; background: var(--input-bg); border-radius: 24px; padding: 9px 14px; gap: 10px; min-height: 44px; }
-    .icon-btn { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; line-height: 1; flex-shrink: 0; transition: color .15s; padding: 0; }
+    .input-row { display: flex; align-items: flex-end; gap: 7px; padding: 7px 10px; }
+    .input-box { flex: 1; display: flex; align-items: flex-end; background: var(--input-bg); border-radius: 24px; padding: 8px 12px; gap: 8px; min-height: 42px; }
+    .icon-btn { background: none; border: none; color: var(--muted); font-size: 21px; cursor: pointer; line-height: 1; flex-shrink: 0; transition: color .15s; padding: 0; }
     .icon-btn:hover { color: var(--text); }
-    .chat-input { flex: 1; background: none; border: none; color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; outline: none; resize: none; max-height: 130px; min-height: 22px; line-height: 1.45; }
+    .chat-input { flex: 1; background: none; border: none; color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; outline: none; resize: none; max-height: 120px; min-height: 22px; line-height: 1.45; }
     .chat-input::placeholder { color: var(--muted); }
-    .send-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); border: none; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .18s, transform .1s; }
-    .send-btn:hover { background: var(--accent-dark); transform: scale(1.05); }
-    .send-btn:active { transform: scale(.95); }
+    .send-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); border: none; color: #fff; font-size: 19px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .18s, transform .1s; }
+    .send-btn:hover { background: var(--accent-dark); }
+    .send-btn:active { transform: scale(.93); }
 
-    /* ═══════════════════════════════════════
+    /* ══════════════════════════════════
        BULK PAGE
-    ═══════════════════════════════════════ */
-    .bulk-page { flex: 1; overflow-y: auto; padding: 28px; display: flex; gap: 20px; }
-    .bulk-left { flex: 1; display: flex; flex-direction: column; gap: 16px; }
-    .bulk-right { width: 300px; display: flex; flex-direction: column; gap: 16px; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
-    .card-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
-    .type-toggle { display: flex; background: var(--surface2); border-radius: 8px; padding: 3px; margin-bottom: 14px; gap: 3px; }
-    .type-btn { flex: 1; padding: 8px; border-radius: 6px; border: none; background: none; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .18s; }
+    ══════════════════════════════════ */
+    .bulk-page { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 16px; display: flex; gap: 16px; }
+    .bulk-left { flex: 1; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+    .bulk-right { width: 280px; display: flex; flex-direction: column; gap: 14px; flex-shrink: 0; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .card-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .type-toggle { display: flex; background: var(--surface2); border-radius: 8px; padding: 3px; margin-bottom: 12px; gap: 3px; }
+    .type-btn { flex: 1; padding: 7px 4px; border-radius: 6px; border: none; background: none; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .18s; }
     .type-btn.active { background: var(--accent); color: #fff; }
-    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
     .form-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .form-label-row { display: flex; align-items: center; justify-content: space-between; }
     .form-input, .form-textarea { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; width: 100%; transition: border-color .18s; }
     .form-input:focus, .form-textarea:focus { border-color: var(--accent); }
-    .form-textarea { resize: vertical; min-height: 90px; }
-    .numbers-area { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-family: monospace; font-size: 12px; outline: none; width: 100%; resize: vertical; min-height: 130px; transition: border-color .18s; }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .numbers-area { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-family: monospace; font-size: 12px; outline: none; width: 100%; resize: vertical; min-height: 110px; transition: border-color .18s; }
     .numbers-area:focus { border-color: var(--accent); }
-    .btn { border: none; border-radius: 8px; padding: 11px 20px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .18s, transform .1s; }
+
+    /* CSV Import button */
+    .csv-btn { display: inline-flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 5px 11px; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .18s; white-space: nowrap; }
+    .csv-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .csv-modal { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 500; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .csv-modal.open { display: flex; }
+    .csv-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; width: 100%; max-width: 440px; box-shadow: 0 8px 40px rgba(0,0,0,.5); }
+    .csv-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .csv-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
+    .csv-drop { border: 2px dashed var(--border); border-radius: 10px; padding: 30px 20px; text-align: center; cursor: pointer; transition: border-color .18s, background .18s; margin-bottom: 14px; }
+    .csv-drop:hover, .csv-drop.drag { border-color: var(--accent); background: rgba(0,168,132,.05); }
+    .csv-drop-icon { font-size: 36px; margin-bottom: 10px; }
+    .csv-drop-text { font-size: 14px; color: var(--muted); }
+    .csv-drop-text strong { color: var(--accent); }
+    .csv-preview { background: var(--surface2); border-radius: 8px; padding: 10px 12px; font-family: monospace; font-size: 12px; color: var(--muted); max-height: 120px; overflow-y: auto; margin-bottom: 14px; display: none; line-height: 1.7; }
+    .csv-preview.show { display: block; }
+    .csv-count { font-size: 13px; color: var(--accent); font-weight: 600; margin-bottom: 14px; display: none; }
+    .csv-count.show { display: block; }
+    .csv-actions { display: flex; gap: 10px; }
+    .btn { border: none; border-radius: 8px; padding: 10px 18px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .18s; }
     .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
     .btn-full { width: 100%; }
     .btn:disabled { opacity: .4; cursor: not-allowed; }
     .btn:hover:not(:disabled) { opacity: .88; }
     .stat-row { display: flex; gap: 8px; }
-    .stat-box { flex: 1; background: var(--surface2); border-radius: 8px; padding: 14px; text-align: center; }
-    .stat-num { font-size: 24px; font-weight: 800; color: var(--accent); }
-    .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
-    .bulk-log { background: var(--surface2); border-radius: 8px; padding: 10px 12px; font-family: monospace; font-size: 11px; color: var(--muted); max-height: 200px; overflow-y: auto; line-height: 1.8; }
+    .stat-box { flex: 1; background: var(--surface2); border-radius: 8px; padding: 12px; text-align: center; }
+    .stat-num { font-size: 22px; font-weight: 800; color: var(--accent); }
+    .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .bulk-log { background: var(--surface2); border-radius: 8px; padding: 10px 12px; font-family: monospace; font-size: 11px; color: var(--muted); max-height: 180px; overflow-y: auto; line-height: 1.8; }
     .log-ok { color: var(--accent); }
     .log-err { color: var(--danger); }
-    .tpl-list { display: flex; flex-direction: column; gap: 6px; max-height: 190px; overflow-y: auto; }
+    .tpl-list { display: flex; flex-direction: column; gap: 6px; max-height: 170px; overflow-y: auto; }
     .tpl-item { padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: border-color .15s; }
     .tpl-item:hover { border-color: var(--accent); }
     .tpl-item.selected { border-color: var(--accent); background: rgba(0,168,132,.1); }
@@ -262,23 +203,49 @@
     .tpl-lang { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
     /* LIGHTBOX */
-    .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.93); z-index: 999; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+    .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.93); z-index: 999; display: none; align-items: center; justify-content: center; }
     .lightbox.open { display: flex; }
-    .lightbox img { max-width: 88vw; max-height: 84vh; border-radius: 8px; box-shadow: 0 4px 40px rgba(0,0,0,.6); }
-    .lb-close { position: absolute; top: 18px; right: 22px; background: rgba(255,255,255,.1); border: none; color: #fff; font-size: 22px; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-    .lb-close:hover { background: rgba(255,255,255,.2); }
+    .lightbox img { max-width: 92vw; max-height: 86vh; border-radius: 8px; }
+    .lb-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,.12); border: none; color: #fff; font-size: 20px; cursor: pointer; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
     /* TOAST */
-    .toast { position: fixed; bottom: 28px; right: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; font-size: 13px; z-index: 998; display: none; box-shadow: 0 4px 20px rgba(0,0,0,.4); }
+    .toast { position: fixed; bottom: 20px; right: 16px; left: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 11px 16px; font-size: 13px; z-index: 998; display: none; box-shadow: 0 4px 20px rgba(0,0,0,.4); text-align: center; }
     .toast.show { display: block; animation: toastIn .25s ease; }
     .toast.ok { border-color: var(--accent); color: var(--accent); }
     .toast.err { border-color: var(--danger); color: var(--danger); }
-    @keyframes toastIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes toastIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
-    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.18); }
+
+    /* ══════════════════════════════════
+       MOBILE RESPONSIVE
+    ══════════════════════════════════ */
+    @media (max-width: 700px) {
+      .topbar { padding: 0 12px; }
+      .tab { padding: 5px 10px; font-size: 11px; }
+      .online span { display: none; }
+
+      /* On mobile: sidebar fills screen, chat area fills screen */
+      #page-chat { position: relative; }
+      .sidebar { position: absolute; inset: 0; width: 100%; z-index: 5; transform: translateX(0); }
+      .chat-area { position: absolute; inset: 0; z-index: 6; transform: translateX(100%); transition: transform .25s; }
+      .chat-area.mobile-open { transform: translateX(0); }
+
+      .back-btn { display: block; }
+      .msg-bubble { max-width: 80%; }
+
+      /* Bulk page: stack columns */
+      .bulk-page { flex-direction: column; padding: 14px 12px; }
+      .bulk-right { width: 100%; }
+      .stat-num { font-size: 20px; }
+    }
+
+    @media (max-width: 400px) {
+      .ep-grid { grid-template-columns: repeat(7, 1fr); }
+      .ep-item { font-size: 20px; }
+    }
   </style>
 </head>
 <body>
@@ -290,24 +257,22 @@
     <button class="tab active" onclick="switchTab('chat',this)">💬 Chats</button>
     <button class="tab" onclick="switchTab('bulk',this)">📤 Bulk Send</button>
   </div>
-  <div class="online"><div class="dot"></div> Live</div>
+  <div class="online"><div class="dot"></div><span>Live</span></div>
 </div>
 
 <div class="main">
 
   <!-- ══ CHAT PAGE ══ -->
   <div class="page active" id="page-chat">
-
-    <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
       <div class="sidebar-head">
         <div class="sidebar-title-row">
           <div class="sidebar-title">Chats</div>
           <button class="icon-round" onclick="loadConvs()" title="Refresh">↻</button>
         </div>
         <div class="search-bar">
-          <span class="search-icon">🔍</span>
-          <input type="text" placeholder="Search or start new chat" oninput="filterConvs(this.value)" />
+          <span>🔍</span>
+          <input type="text" placeholder="Search…" oninput="filterConvs(this.value)" />
         </div>
       </div>
       <div class="conv-list" id="conv-list">
@@ -315,15 +280,13 @@
       </div>
     </div>
 
-    <!-- Chat area -->
     <div class="chat-area" id="chat-area">
       <div class="chat-welcome">
         <div class="chat-welcome-icon">💬</div>
         <h2>PillarPark Chat</h2>
-        <p>Select a conversation from the left to start messaging your customers.</p>
+        <p>Select a conversation to start messaging.</p>
       </div>
     </div>
-
   </div>
 
   <!-- ══ BULK PAGE ══ -->
@@ -349,19 +312,25 @@
             </div>
           </div>
         </div>
+
         <div class="card">
           <div class="card-label">Recipients</div>
           <div class="form-group">
-            <div class="form-label">Phone numbers (one per line, with country code)</div>
-            <textarea class="numbers-area" id="bulk-numbers" placeholder="+995599123456&#10;+44712345678"></textarea>
+            <div class="form-label-row">
+              <div class="form-label">Phone numbers (one per line)</div>
+              <button class="csv-btn" onclick="openCsvModal()">📂 Import CSV</button>
+            </div>
+            <textarea class="numbers-area" id="bulk-numbers" placeholder="+995599123456&#10;+44712345678&#10;+12025550123"></textarea>
           </div>
           <div class="form-group">
             <div class="form-label">Delay between messages (ms)</div>
             <input class="form-input" type="number" id="bulk-delay" value="2000" min="500" />
           </div>
         </div>
+
         <button class="btn btn-primary btn-full" id="bulk-btn" onclick="startBulk()">📤 Start Bulk Send</button>
       </div>
+
       <div class="bulk-right">
         <div class="card">
           <div class="card-label">Stats</div>
@@ -371,7 +340,7 @@
             <div class="stat-box"><div class="stat-num" id="s-fail" style="color:var(--danger)">0</div><div class="stat-lbl">Failed</div></div>
           </div>
         </div>
-        <div class="card" style="flex:1">
+        <div class="card">
           <div class="card-label">Log</div>
           <div class="bulk-log" id="bulk-log">Waiting to start…</div>
         </div>
@@ -381,137 +350,145 @@
 
 </div>
 
-<!-- Lightbox -->
+<!-- CSV IMPORT MODAL -->
+<div class="csv-modal" id="csv-modal" onclick="csvBgClick(event)">
+  <div class="csv-box">
+    <div class="csv-title">📂 Import Numbers from CSV</div>
+    <div class="csv-sub">Upload a CSV file. The importer will find all columns that look like phone numbers (starting with + or containing 7+ digits) and add them to the recipients list.</div>
+    <div class="csv-drop" id="csv-drop" onclick="document.getElementById('csv-file').click()"
+         ondragover="csvDragOver(event)" ondragleave="csvDragLeave(event)" ondrop="csvDrop(event)">
+      <div class="csv-drop-icon">📄</div>
+      <div class="csv-drop-text">Click to choose a file or <strong>drag & drop</strong><br/><span style="font-size:12px;margin-top:4px;display:block">Supports .csv files</span></div>
+    </div>
+    <input type="file" id="csv-file" accept=".csv,text/csv" style="display:none" onchange="csvFileChosen(this)" />
+    <div class="csv-count" id="csv-count"></div>
+    <div class="csv-preview" id="csv-preview"></div>
+    <div class="csv-actions">
+      <button class="btn btn-primary" id="csv-import-btn" onclick="doImportCsv()" style="display:none">✓ Add to Recipients</button>
+      <button class="btn btn-secondary" onclick="closeCsvModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLb()">
-  <button class="lb-close" onclick="closeLb()">✕</button>
+  <button class="lb-close">✕</button>
   <img id="lb-img" src="" onclick="event.stopPropagation()" />
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // EMOJI DATA
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 const ECATS = {
-  '😀': ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘','🥲','😗','😙','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😴','😪','😫','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','😵','🥴','😠','😡','🤬','😷','🤒','🤕','🤢','🤮','🤧','😇','🥳','🥺','🤠','🤡','👹','👺','💀','☠️','👻','👽','👾','🤖','💩','😈'],
-  '👍': ['👍','👎','👌','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✋','🖐️','👋','🤚','🙌','👏','🤝','🙏','💪','✍️','🫶','🫂','💅','🖖','🤳'],
-  '❤️': ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','❤️‍🔥','❤️‍🩹','🔥','✨','⭐','🌟','💫','💥','🎉','🎊','🎈','🎁','🏆','🥇','🎯','🍀','🌈','☀️','🌙','⚡','🌊','🌺','🌸','🌼','🌻','🌹','💐'],
-  '🐶': ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🙈','🙉','🙊','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🦋','🐌','🐞','🐜','🐢','🐍','🦎','🐙','🦑','🐬','🐳','🦈','🐊','🦒','🐘','🦛','🦏','🦘','🐕','🐈','🐓','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿️'],
-  '🍎': ['🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥕','🌽','🍔','🍟','🍕','🌮','🌯','🍣','🍜','🍝','🍛','🍱','🍦','🍰','🎂','🍩','🍪','🍫','🍿','🍺','🍷','🥂','☕','🧃','🥤','🧋','🍵','🍸','🍹','🧊'],
-  '⚽': ['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🎱','🏓','🏸','⛳','🎯','🎮','🎲','🎭','🎨','🎬','🎤','🎧','🎵','🎶','🎹','🥁','🎸','🎺','🎻','🎠','🎡','🎢','🎪'],
-  '🚗': ['🚗','🚕','🚙','🚌','🏎️','🚓','🚑','🚒','🚲','🛵','🏍️','✈️','🚀','🛸','🚢','⛵','🚁','🌍','🗺️','🏔️','🏖️','🏠','🏢','🏰','🗼','🌆','🌃','🌉','🌄','🌅','🌇','🌌','🌠'],
-  '💡': ['💡','🔦','💰','💳','📱','💻','🖥️','⌨️','📷','📸','📹','🎥','📞','📺','📻','🔋','🔌','🧲','🔧','🔨','⚙️','🔑','🗝️','🔒','🔓','📧','📝','📖','📚','📎','✂️','🗑️','🔍','🔎','💊','🩺','🔬','🔭','🧪','💉','🧬','🩸']
+  '😀':['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','🥰','😘','🥲','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😒','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','😵','🥴','😠','😡','🤬','😷','🤒','🤕','🤢','🤮','🤧','😇','🥳','🥺','🤠','🤡','👹','👺','💀','☠️','👻','👽','👾','🤖','💩','😈'],
+  '👍':['👍','👎','👌','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✋','🖐️','👋','🤚','🙌','👏','🤝','🙏','💪','✍️','🫶','🫂','💅','🖖'],
+  '❤️':['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','❤️‍🔥','🔥','✨','⭐','🌟','💫','💥','🎉','🎊','🎈','🎁','🏆','🥇','🎯','🍀','🌈','☀️','🌙','⚡','🌊','🌺','🌸','🌼','🌻','🌹','💐'],
+  '🐶':['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🙈','🙉','🙊','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🦋','🐌','🐞','🐜','🐢','🐍','🦎','🐙','🦑','🐬','🐳','🦈','🐊','🦒','🐘','🦛','🦏','🦘','🐕','🐈','🐓','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦦','🦥','🐁','🐀','🐿️'],
+  '🍎':['🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥕','🌽','🍔','🍟','🍕','🌮','🌯','🍣','🍜','🍝','🍛','🍱','🍦','🍰','🎂','🍩','🍪','🍫','🍿','🍺','🍷','🥂','☕','🧃','🥤','🧋','🍵','🍸','🍹','🧊'],
+  '⚽':['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🎱','🏓','🏸','⛳','🎯','🎮','🎲','🎭','🎨','🎬','🎤','🎧','🎵','🎶','🎹','🥁','🎸','🎺','🎻'],
+  '🚗':['🚗','🚕','🚙','🚌','🏎️','🚓','🚑','🚒','🚲','🛵','🏍️','✈️','🚀','🛸','🚢','⛵','🚁','🌍','🗺️','🏔️','🏖️','🏠','🏢','🏰','🗼','🌆','🌃','🌉'],
+  '💡':['💡','🔦','💰','💳','📱','💻','🖥️','⌨️','📷','📸','📹','🎥','📞','📺','📻','🔋','🔌','🧲','🔧','🔨','⚙️','🔑','🗝️','🔒','🔓','📧','📝','📖','📚','📎','✂️','🗑️','🔍','🔎','💊','🩺','🔬','🔭','🧪','💉','🧬']
 };
 const CAT_KEYS = Object.keys(ECATS);
 
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════════
-let allConvs = [], activePhone = null, pollTimer = null;
-let bulkType = 'text', selTemplate = null;
-let pendingFile = null;
-let emojiOpen = false, attachOpen = false;
-let currentCat = '😀', emojiQ = '';
+// ═══════════════════════════════════════════
+let allConvs=[], activePhone=null, pollTimer=null;
+let bulkType='text', selTemplate=null, pendingFile=null;
+let emojiOpen=false, attachOpen=false;
+let currentCat='😀', emojiQ='';
+let csvNumbers=[];
+const isMobile = () => window.innerWidth <= 700;
 
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // TABS
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 function switchTab(tab, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + tab).classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
   btn.classList.add('active');
-  if (tab === 'bulk') loadTemplates();
+  if (tab==='bulk') loadTemplates();
 }
 
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // TOAST
-// ═══════════════════════════════════════════════
-function showToast(msg, type = 'ok') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + type;
-  setTimeout(() => t.classList.remove('show'), 3000);
+// ═══════════════════════════════════════════
+function showToast(msg, type='ok') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show '+type;
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-function fmtTime(iso) {
-  if (!iso) return '';
-  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
+function fmtTime(iso) { if(!iso) return ''; return new Date(iso).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 function fmtDate(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  const today = new Date();
-  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-  if (d.toDateString() === today.toDateString()) return 'Today';
-  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
-  return d.toLocaleDateString([], { day: 'numeric', month: 'long', year: 'numeric' });
+  if(!iso) return '';
+  const d=new Date(iso), today=new Date(), yest=new Date(today);
+  yest.setDate(today.getDate()-1);
+  if(d.toDateString()===today.toDateString()) return 'Today';
+  if(d.toDateString()===yest.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString([],{day:'numeric',month:'long',year:'numeric'});
 }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function esc(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // CONVERSATIONS
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadConvs() {
   try {
-    const r = await fetch('/api/conversations');
-    allConvs = await r.json();
+    const r=await fetch('/api/conversations');
+    allConvs=await r.json();
     renderConvs(allConvs);
-  } catch {
-    document.getElementById('conv-list').innerHTML = '<div class="empty-state">Failed to load</div>';
-  }
+  } catch { document.getElementById('conv-list').innerHTML='<div class="empty-state">Failed to load</div>'; }
 }
 
 function renderConvs(list) {
-  const el = document.getElementById('conv-list');
-  if (!list.length) {
-    el.innerHTML = '<div class="empty-state">No conversations yet.<br/>Messages will appear here when received.</div>';
-    return;
-  }
-  el.innerHTML = list.map(c => `
-    <div class="conv-item ${c.phone === activePhone ? 'active' : ''}" onclick="openConv('${c.phone}')">
-      <div class="avatar">${(c.name || c.phone)[0].toUpperCase()}</div>
+  const el=document.getElementById('conv-list');
+  if(!list.length){el.innerHTML='<div class="empty-state">No conversations yet.<br/>Messages will appear here.</div>';return;}
+  el.innerHTML=list.map(c=>`
+    <div class="conv-item ${c.phone===activePhone?'active':''}" onclick="openConv('${c.phone}')">
+      <div class="avatar">${(c.name||c.phone)[0].toUpperCase()}</div>
       <div class="conv-info">
-        <div class="conv-name">${esc(c.name || c.phone)}</div>
-        <div class="conv-preview">${esc(c.lastMessage || 'No messages yet')}</div>
+        <div class="conv-name">${esc(c.name||c.phone)}</div>
+        <div class="conv-preview">${esc(c.lastMessage||'No messages yet')}</div>
       </div>
       <div class="conv-meta">
         <div class="conv-time">${fmtTime(c.lastTime)}</div>
-        ${c.unread ? `<div class="unread-badge">${c.unread}</div>` : ''}
+        ${c.unread?`<div class="unread-badge">${c.unread}</div>`:''}
       </div>
     </div>`).join('');
 }
 
 function filterConvs(q) {
-  renderConvs(allConvs.filter(c =>
-    (c.name || '').toLowerCase().includes(q.toLowerCase()) || (c.phone || '').includes(q)));
+  renderConvs(allConvs.filter(c=>(c.name||'').toLowerCase().includes(q.toLowerCase())||(c.phone||'').includes(q)));
 }
 
-// ═══════════════════════════════════════════════
-// OPEN CONVERSATION
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// OPEN CONV
+// ═══════════════════════════════════════════
 async function openConv(phone) {
-  activePhone = phone;
+  activePhone=phone;
   renderConvs(allConvs);
-  const conv = allConvs.find(c => c.phone === phone) || { phone, name: phone };
+  const conv=allConvs.find(c=>c.phone===phone)||{phone,name:phone};
 
-  document.getElementById('chat-area').innerHTML = `
+  const chatArea=document.getElementById('chat-area');
+  chatArea.innerHTML=`
     <div class="chat-header">
-      <div class="avatar">${(conv.name || phone)[0].toUpperCase()}</div>
+      <button class="back-btn" onclick="goBack()">‹</button>
+      <div class="avatar">${(conv.name||phone)[0].toUpperCase()}</div>
       <div class="chat-header-info">
-        <div class="chat-header-name">${esc(conv.name || phone)}</div>
+        <div class="chat-header-name">${esc(conv.name||phone)}</div>
         <div class="chat-header-sub">${phone}</div>
       </div>
     </div>
     <div class="messages" id="msg-list"></div>
     <div class="input-section">
       <div class="file-preview" id="fp-bar">
-        <img id="fp-thumb" class="fp-thumb" src="" style="display:none" />
+        <img id="fp-thumb" class="fp-thumb" src="" style="display:none"/>
         <div class="fp-info">
           <div class="fp-name" id="fp-name"></div>
           <div class="fp-size" id="fp-size"></div>
@@ -521,26 +498,20 @@ async function openConv(phone) {
       <div class="emoji-picker" id="ep">
         <div class="ep-top">
           <div class="ep-cats" id="ep-cats"></div>
-          <input class="ep-search" placeholder="Search emoji…" oninput="searchEmoji(this.value)" />
+          <input class="ep-search" placeholder="Search emoji…" oninput="searchEmoji(this.value)"/>
         </div>
         <div class="ep-grid" id="ep-grid"></div>
       </div>
       <div class="attach-menu" id="am">
-        <div class="attach-opt" onclick="pickFile('image/*,video/*')">
-          <span class="attach-opt-icon">🖼️</span> Photo / Video
-        </div>
-        <div class="attach-opt" onclick="pickFile('.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip')">
-          <span class="attach-opt-icon">📄</span> Document
-        </div>
-        <div class="attach-opt" onclick="pickFile('audio/*')">
-          <span class="attach-opt-icon">🎵</span> Audio
-        </div>
+        <div class="attach-opt" onclick="pickFile('image/*,video/*')"><span class="attach-opt-icon">🖼️</span>Photo / Video</div>
+        <div class="attach-opt" onclick="pickFile('.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip')"><span class="attach-opt-icon">📄</span>Document</div>
+        <div class="attach-opt" onclick="pickFile('audio/*')"><span class="attach-opt-icon">🎵</span>Audio</div>
       </div>
-      <input type="file" id="fi" style="display:none" onchange="fileChosen(this)" />
+      <input type="file" id="fi" style="display:none" onchange="fileChosen(this)"/>
       <div class="input-row">
         <div class="input-box">
-          <button class="icon-btn" onclick="toggleEmoji(event)" title="Emoji">😊</button>
-          <button class="icon-btn" onclick="toggleAttach(event)" title="Attach file">📎</button>
+          <button class="icon-btn" onclick="toggleEmoji(event)">😊</button>
+          <button class="icon-btn" onclick="toggleAttach(event)">📎</button>
           <textarea class="chat-input" id="ci" placeholder="Type a message" rows="1"
             oninput="autoH(this)" onkeydown="onKey(event)"></textarea>
         </div>
@@ -548,291 +519,253 @@ async function openConv(phone) {
       </div>
     </div>`;
 
+  if(isMobile()) chatArea.classList.add('mobile-open');
   buildEmojiPicker();
   await loadMsgs(phone);
-  if (pollTimer) clearInterval(pollTimer);
-  pollTimer = setInterval(() => loadMsgs(phone), 3000);
-
-  document.addEventListener('click', globalClickHandler);
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer=setInterval(()=>loadMsgs(phone),3000);
+  document.addEventListener('click',globalClickHandler);
 }
 
-function autoH(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 130) + 'px';
+function goBack() {
+  document.getElementById('chat-area').classList.remove('mobile-open');
+  activePhone=null;
+  if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+  document.removeEventListener('click',globalClickHandler);
 }
 
-// ═══════════════════════════════════════════════
-// EMOJI PICKER
-// ═══════════════════════════════════════════════
-function buildEmojiPicker() {
-  const cats = document.getElementById('ep-cats');
-  if (!cats) return;
-  cats.innerHTML = CAT_KEYS.map(k =>
-    `<button class="ep-cat ${k === currentCat ? 'active' : ''}" onclick="setCat('${k}')">${k}</button>`
-  ).join('');
+function autoH(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+
+// ═══════════════════════════════════════════
+// EMOJI
+// ═══════════════════════════════════════════
+function buildEmojiPicker(){
+  const cats=document.getElementById('ep-cats'); if(!cats) return;
+  cats.innerHTML=CAT_KEYS.map(k=>`<button class="ep-cat ${k===currentCat?'active':''}" onclick="setCat('${k}')">${k}</button>`).join('');
   renderGrid();
 }
-
-function setCat(c) {
-  currentCat = c; emojiQ = '';
-  const s = document.querySelector('.ep-search'); if (s) s.value = '';
-  document.querySelectorAll('.ep-cat').forEach(b => b.classList.toggle('active', b.textContent === c));
-  renderGrid();
+function setCat(c){currentCat=c;emojiQ='';const s=document.querySelector('.ep-search');if(s)s.value='';document.querySelectorAll('.ep-cat').forEach(b=>b.classList.toggle('active',b.textContent===c));renderGrid();}
+function searchEmoji(q){emojiQ=q;renderGrid();}
+function renderGrid(){
+  const g=document.getElementById('ep-grid');if(!g)return;
+  const list=emojiQ?Object.values(ECATS).flat().filter((e,i,a)=>a.indexOf(e)===i):(ECATS[currentCat]||[]);
+  g.innerHTML=list.map(e=>`<div class="ep-item" onclick="insEmoji('${e}')">${e}</div>`).join('');
 }
+function insEmoji(e){const ci=document.getElementById('ci');if(!ci)return;const p=ci.selectionStart;ci.value=ci.value.slice(0,p)+e+ci.value.slice(ci.selectionEnd);ci.selectionStart=ci.selectionEnd=p+e.length;ci.focus();autoH(ci);}
+function toggleEmoji(ev){ev.stopPropagation();emojiOpen=!emojiOpen;attachOpen=false;sync();}
+function toggleAttach(ev){ev.stopPropagation();attachOpen=!attachOpen;emojiOpen=false;sync();}
+function sync(){const ep=document.getElementById('ep'),am=document.getElementById('am');if(ep)ep.classList.toggle('open',emojiOpen);if(am)am.classList.toggle('open',attachOpen);}
+function globalClickHandler(e){if(!e.target.closest('#ep')&&!e.target.closest('.icon-btn'))emojiOpen=false;if(!e.target.closest('#am')&&!e.target.closest('.icon-btn')&&!e.target.closest('.attach-opt'))attachOpen=false;sync();}
 
-function searchEmoji(q) { emojiQ = q; renderGrid(); }
-
-function renderGrid() {
-  const g = document.getElementById('ep-grid'); if (!g) return;
-  let list;
-  if (emojiQ) {
-    list = Object.values(ECATS).flat().filter((e, i, a) => a.indexOf(e) === i);
-  } else {
-    list = ECATS[currentCat] || [];
-  }
-  g.innerHTML = list.map(e => `<div class="ep-item" onclick="insEmoji('${e}')">${e}</div>`).join('');
+// ═══════════════════════════════════════════
+// FILE
+// ═══════════════════════════════════════════
+function pickFile(accept){const fi=document.getElementById('fi');if(fi){fi.accept=accept;fi.click();}attachOpen=false;sync();}
+function fileChosen(input){
+  const f=input.files[0];if(!f)return;
+  pendingFile=f;
+  const bar=document.getElementById('fp-bar'),nm=document.getElementById('fp-name'),sz=document.getElementById('fp-size'),th=document.getElementById('fp-thumb');
+  if(!bar)return;
+  bar.classList.add('show');nm.textContent=f.name;sz.textContent=(f.size/1024).toFixed(1)+' KB';
+  if(f.type.startsWith('image/')){th.src=URL.createObjectURL(f);th.style.display='';}else th.style.display='none';
 }
+function clearFile(){pendingFile=null;const bar=document.getElementById('fp-bar'),fi=document.getElementById('fi');if(bar)bar.classList.remove('show');if(fi)fi.value='';}
 
-function insEmoji(e) {
-  const ci = document.getElementById('ci'); if (!ci) return;
-  const p = ci.selectionStart;
-  ci.value = ci.value.slice(0, p) + e + ci.value.slice(ci.selectionEnd);
-  ci.selectionStart = ci.selectionEnd = p + e.length;
-  ci.focus(); autoH(ci);
-}
-
-function toggleEmoji(ev) {
-  ev.stopPropagation();
-  emojiOpen = !emojiOpen;
-  attachOpen = false;
-  syncDropdowns();
-}
-
-function toggleAttach(ev) {
-  ev.stopPropagation();
-  attachOpen = !attachOpen;
-  emojiOpen = false;
-  syncDropdowns();
-}
-
-function syncDropdowns() {
-  const ep = document.getElementById('ep');
-  const am = document.getElementById('am');
-  if (ep) ep.classList.toggle('open', emojiOpen);
-  if (am) am.classList.toggle('open', attachOpen);
-}
-
-function globalClickHandler(e) {
-  if (!e.target.closest('#ep') && !e.target.closest('.icon-btn')) emojiOpen = false;
-  if (!e.target.closest('#am') && !e.target.closest('.icon-btn') && !e.target.closest('.attach-opt')) attachOpen = false;
-  syncDropdowns();
-}
-
-// ═══════════════════════════════════════════════
-// FILE HANDLING
-// ═══════════════════════════════════════════════
-function pickFile(accept) {
-  const fi = document.getElementById('fi');
-  if (fi) { fi.accept = accept; fi.click(); }
-  attachOpen = false; syncDropdowns();
-}
-
-function fileChosen(input) {
-  const f = input.files[0]; if (!f) return;
-  pendingFile = f;
-  const bar = document.getElementById('fp-bar');
-  const nm = document.getElementById('fp-name');
-  const sz = document.getElementById('fp-size');
-  const th = document.getElementById('fp-thumb');
-  if (!bar) return;
-  bar.classList.add('show');
-  nm.textContent = f.name;
-  sz.textContent = (f.size / 1024).toFixed(1) + ' KB';
-  if (f.type.startsWith('image/')) { th.src = URL.createObjectURL(f); th.style.display = ''; }
-  else th.style.display = 'none';
-}
-
-function clearFile() {
-  pendingFile = null;
-  const bar = document.getElementById('fp-bar');
-  const fi = document.getElementById('fi');
-  if (bar) bar.classList.remove('show');
-  if (fi) fi.value = '';
-}
-
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // MESSAGES
-// ═══════════════════════════════════════════════
-async function loadMsgs(phone) {
-  try {
-    const r = await fetch(`/api/conversations/${phone}`);
-    const data = await r.json();
-    const list = document.getElementById('msg-list'); if (!list) return;
-    const atBot = list.scrollHeight - list.scrollTop <= list.clientHeight + 80;
-
-    const msgs = data.messages || [];
-    let html = '';
-    let lastDate = '';
-
-    msgs.forEach(m => {
-      const d = fmtDate(m.time);
-      if (d !== lastDate) {
-        html += `<div class="date-divider"><span>${d}</span></div>`;
-        lastDate = d;
-      }
-      const me = m.from === 'me';
-      let content = '';
-
-      if (m.mediaUrl && m.mediaType === 'image') {
-        content = `<img class="msg-img" src="${m.mediaUrl}" onclick="openLb('${m.mediaUrl}')" />`;
-      } else if (m.mediaUrl) {
-        content = `<div class="msg-file-row"><span class="msg-file-icon">📄</span><a class="msg-file-name" href="${m.mediaUrl}" target="_blank">${esc(m.text)}</a></div>`;
-      } else {
-        content = `<span class="msg-text">${esc(m.text)}</span>`;
-      }
-
-      let tick = '';
-      if (me) {
-        if (m.status === 'read') tick = '<span class="msg-tick tick-read">✓✓</span>';
-        else if (m.status === 'delivered') tick = '<span class="msg-tick tick-delivered">✓✓</span>';
-        else tick = '<span class="msg-tick tick-sent">✓</span>';
-      }
-
-      html += `
-        <div class="msg-row ${me ? 'me' : 'them'}">
-          <div class="msg-bubble">
-            ${content}
-            <div class="msg-footer">
-              <span class="msg-time">${fmtTime(m.time)}</span>
-              ${tick}
-            </div>
-          </div>
-        </div>`;
+// ═══════════════════════════════════════════
+async function loadMsgs(phone){
+  try{
+    const r=await fetch(`/api/conversations/${phone}`);
+    const data=await r.json();
+    const list=document.getElementById('msg-list');if(!list)return;
+    const atBot=list.scrollHeight-list.scrollTop<=list.clientHeight+80;
+    const msgs=data.messages||[];
+    let html='',lastDate='';
+    msgs.forEach(m=>{
+      const d=fmtDate(m.time);
+      if(d!==lastDate){html+=`<div class="date-divider"><span>${d}</span></div>`;lastDate=d;}
+      const me=m.from==='me';
+      let content='';
+      if(m.mediaUrl&&m.mediaType==='image'){content=`<img class="msg-img" src="${m.mediaUrl}" onclick="openLb('${m.mediaUrl}')"/>`;
+      }else if(m.mediaUrl){content=`<div class="msg-file-row"><span>📄</span><a class="msg-file-name" href="${m.mediaUrl}" target="_blank">${esc(m.text)}</a></div>`;
+      }else{content=`<span>${esc(m.text)}</span>`;}
+      let tick='';
+      if(me){if(m.status==='read')tick='<span class="msg-tick tick-read">✓✓</span>';else if(m.status==='delivered')tick='<span class="msg-tick tick-delivered">✓✓</span>';else tick='<span class="msg-tick tick-sent">✓</span>';}
+      html+=`<div class="msg-row ${me?'me':'them'}"><div class="msg-bubble">${content}<div class="msg-footer"><span class="msg-time">${fmtTime(m.time)}</span>${tick}</div></div></div>`;
     });
-
-    list.innerHTML = html;
-    if (atBot) list.scrollTop = list.scrollHeight;
-
-    const idx = allConvs.findIndex(c => c.phone === phone);
-    if (idx >= 0) { allConvs[idx].unread = 0; renderConvs(allConvs); }
-  } catch (e) {}
+    list.innerHTML=html;
+    if(atBot)list.scrollTop=list.scrollHeight;
+    const idx=allConvs.findIndex(c=>c.phone===phone);
+    if(idx>=0){allConvs[idx].unread=0;renderConvs(allConvs);}
+  }catch(e){}
+}
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSend();}}
+async function doSend(){
+  if(!activePhone)return;
+  if(pendingFile){await sendFile();return;}
+  const ci=document.getElementById('ci');if(!ci)return;
+  const msg=ci.value.trim();if(!msg)return;
+  ci.value='';ci.style.height='auto';
+  try{
+    const r=await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:activePhone,message:msg,type:'text'})});
+    const d=await r.json();
+    if(d.error){showToast(d.error,'err');return;}
+    await loadMsgs(activePhone);loadConvs();
+  }catch{showToast('Failed to send','err');}
+}
+async function sendFile(){
+  if(!pendingFile||!activePhone)return;
+  const fd=new FormData();fd.append('file',pendingFile);fd.append('to',activePhone);
+  try{
+    const r=await fetch('/api/send-media',{method:'POST',body:fd});
+    const d=await r.json();
+    if(d.error){showToast(d.error,'err');return;}
+    clearFile();await loadMsgs(activePhone);loadConvs();
+  }catch{showToast('Failed to send file','err');}
 }
 
-function onKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); }
-}
-
-async function doSend() {
-  if (!activePhone) return;
-  if (pendingFile) { await sendFile(); return; }
-  const ci = document.getElementById('ci'); if (!ci) return;
-  const msg = ci.value.trim(); if (!msg) return;
-  ci.value = ''; ci.style.height = 'auto';
-  try {
-    const r = await fetch('/api/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to: activePhone, message: msg, type: 'text' })
-    });
-    const d = await r.json();
-    if (d.error) { showToast(d.error, 'err'); return; }
-    await loadMsgs(activePhone);
-    loadConvs();
-  } catch { showToast('Failed to send', 'err'); }
-}
-
-async function sendFile() {
-  if (!pendingFile || !activePhone) return;
-  const fd = new FormData();
-  fd.append('file', pendingFile);
-  fd.append('to', activePhone);
-  try {
-    const r = await fetch('/api/send-media', { method: 'POST', body: fd });
-    const d = await r.json();
-    if (d.error) { showToast(d.error, 'err'); return; }
-    clearFile();
-    await loadMsgs(activePhone);
-    loadConvs();
-  } catch { showToast('Failed to send file', 'err'); }
-}
-
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // LIGHTBOX
-// ═══════════════════════════════════════════════
-function openLb(url) { document.getElementById('lb-img').src = url; document.getElementById('lightbox').classList.add('open'); }
-function closeLb() { document.getElementById('lightbox').classList.remove('open'); }
+// ═══════════════════════════════════════════
+function openLb(url){document.getElementById('lb-img').src=url;document.getElementById('lightbox').classList.add('open');}
+function closeLb(){document.getElementById('lightbox').classList.remove('open');}
 
-// ═══════════════════════════════════════════════
-// BULK
-// ═══════════════════════════════════════════════
-function setBulkType(t) {
-  bulkType = t;
-  document.getElementById('tt-text').classList.toggle('active', t === 'text');
-  document.getElementById('tt-tpl').classList.toggle('active', t === 'template');
-  document.getElementById('bulk-text-sec').style.display = t === 'text' ? '' : 'none';
-  document.getElementById('bulk-tpl-sec').style.display = t === 'template' ? '' : 'none';
+// ═══════════════════════════════════════════
+// CSV IMPORT
+// ═══════════════════════════════════════════
+function openCsvModal(){document.getElementById('csv-modal').classList.add('open');csvNumbers=[];resetCsvUI();}
+function closeCsvModal(){document.getElementById('csv-modal').classList.remove('open');}
+function csvBgClick(e){if(e.target===document.getElementById('csv-modal'))closeCsvModal();}
+function resetCsvUI(){
+  document.getElementById('csv-count').className='csv-count';
+  document.getElementById('csv-preview').className='csv-preview';
+  document.getElementById('csv-import-btn').style.display='none';
+  document.getElementById('csv-file').value='';
 }
 
-async function loadTemplates() {
-  try {
-    const r = await fetch('/api/templates');
-    const tpls = await r.json();
-    const el = document.getElementById('tpl-list');
-    if (!tpls.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No approved templates found</div>'; return; }
-    el.innerHTML = tpls.map(t => `
-      <div class="tpl-item" onclick="selTpl('${t.name}','${t.language||'en_US'}',this)">
-        <div class="tpl-name">${esc(t.name)}</div>
-        <div class="tpl-lang">${t.language || 'en_US'}</div>
-      </div>`).join('');
-  } catch {}
+function csvDragOver(e){e.preventDefault();document.getElementById('csv-drop').classList.add('drag');}
+function csvDragLeave(e){document.getElementById('csv-drop').classList.remove('drag');}
+function csvDrop(e){
+  e.preventDefault();
+  document.getElementById('csv-drop').classList.remove('drag');
+  const file=e.dataTransfer.files[0];
+  if(file)parseCsvFile(file);
+}
+function csvFileChosen(input){const f=input.files[0];if(f)parseCsvFile(f);}
+
+function parseCsvFile(file){
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const text=e.target.result;
+    const numbers=extractPhoneNumbers(text);
+    csvNumbers=numbers;
+    showCsvResults(numbers);
+  };
+  reader.readAsText(file);
 }
 
-function selTpl(name, lang, el) {
-  selTemplate = { name, lang };
-  document.querySelectorAll('.tpl-item').forEach(i => i.classList.remove('selected'));
-  el.classList.add('selected');
-}
-
-async function startBulk() {
-  const numbers = document.getElementById('bulk-numbers').value.trim().split('\n').map(n => n.trim()).filter(Boolean);
-  if (!numbers.length) { showToast('Add at least one number', 'err'); return; }
-  const msg = document.getElementById('bulk-msg').value.trim();
-  const delay = parseInt(document.getElementById('bulk-delay').value) || 2000;
-  if (bulkType === 'text' && !msg) { showToast('Enter a message', 'err'); return; }
-  if (bulkType === 'template' && !selTemplate) { showToast('Select a template', 'err'); return; }
-
-  const btn = document.getElementById('bulk-btn');
-  btn.disabled = true; btn.textContent = '⏳ Sending…';
-  document.getElementById('s-total').textContent = numbers.length;
-  document.getElementById('s-sent').textContent = '0';
-  document.getElementById('s-fail').textContent = '0';
-  const log = document.getElementById('bulk-log'); log.innerHTML = '';
-  let sent = 0, failed = 0;
-
-  for (const num of numbers) {
-    try {
-      const body = { to: num, type: bulkType, delay, ...(bulkType === 'text' ? { message: msg } : { templateName: selTemplate.name, templateLang: selTemplate.lang }) };
-      const r = await fetch('/api/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      const d = await r.json();
-      if (d.error) throw new Error(d.error);
-      sent++; document.getElementById('s-sent').textContent = sent;
-      log.innerHTML += `<div class="log-ok">✓ ${num}</div>`;
-    } catch (e) {
-      failed++; document.getElementById('s-fail').textContent = failed;
-      log.innerHTML += `<div class="log-err">✗ ${num}: ${e.message}</div>`;
+function extractPhoneNumbers(csvText){
+  // Split by lines then by comma/semicolon/tab
+  const cells=csvText.split(/[\r\n]+/).flatMap(line=>line.split(/[,;\t]/));
+  const found=new Set();
+  cells.forEach(cell=>{
+    const val=cell.trim().replace(/["']/g,'');
+    // Match phone numbers: starts with + or has 7+ digits
+    const cleaned=val.replace(/[\s\-().]/g,'');
+    if(/^\+?\d{7,15}$/.test(cleaned)){
+      // Ensure it has + prefix
+      const num=cleaned.startsWith('+')?cleaned:'+'+cleaned;
+      found.add(num);
     }
-    log.scrollTop = log.scrollHeight;
-    await new Promise(r => setTimeout(r, delay));
+  });
+  return Array.from(found);
+}
+
+function showCsvResults(numbers){
+  const count=document.getElementById('csv-count');
+  const preview=document.getElementById('csv-preview');
+  const btn=document.getElementById('csv-import-btn');
+  if(!numbers.length){
+    count.textContent='No phone numbers found. Make sure your CSV has numbers with country codes (e.g. +995599123456).';
+    count.className='csv-count show';count.style.color='var(--danger)';
+    preview.className='csv-preview';btn.style.display='none';
+    return;
   }
-  btn.disabled = false; btn.textContent = '📤 Start Bulk Send';
+  count.textContent=`✓ Found ${numbers.length} phone number${numbers.length!==1?'s':''}`;
+  count.className='csv-count show';count.style.color='';
+  preview.innerHTML=numbers.slice(0,20).join('\n')+(numbers.length>20?`\n… and ${numbers.length-20} more`:'');
+  preview.className='csv-preview show';
+  btn.style.display='';
+}
+
+function doImportCsv(){
+  if(!csvNumbers.length)return;
+  const area=document.getElementById('bulk-numbers');
+  const existing=area.value.trim();
+  const newNums=csvNumbers.join('\n');
+  area.value=existing?existing+'\n'+newNums:newNums;
+  closeCsvModal();
+  showToast(`Added ${csvNumbers.length} numbers`,'ok');
+}
+
+// ═══════════════════════════════════════════
+// BULK
+// ═══════════════════════════════════════════
+function setBulkType(t){
+  bulkType=t;
+  document.getElementById('tt-text').classList.toggle('active',t==='text');
+  document.getElementById('tt-tpl').classList.toggle('active',t==='template');
+  document.getElementById('bulk-text-sec').style.display=t==='text'?'':'none';
+  document.getElementById('bulk-tpl-sec').style.display=t==='template'?'':'none';
+}
+async function loadTemplates(){
+  try{
+    const r=await fetch('/api/templates');const tpls=await r.json();
+    const el=document.getElementById('tpl-list');
+    if(!tpls.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">No approved templates</div>';return;}
+    el.innerHTML=tpls.map(t=>`<div class="tpl-item" onclick="selTpl('${t.name}','${t.language||'en_US'}',this)"><div class="tpl-name">${esc(t.name)}</div><div class="tpl-lang">${t.language||'en_US'}</div></div>`).join('');
+  }catch{}
+}
+function selTpl(name,lang,el){selTemplate={name,lang};document.querySelectorAll('.tpl-item').forEach(i=>i.classList.remove('selected'));el.classList.add('selected');}
+
+async function startBulk(){
+  const numbers=document.getElementById('bulk-numbers').value.trim().split('\n').map(n=>n.trim()).filter(Boolean);
+  if(!numbers.length){showToast('Add at least one number','err');return;}
+  const msg=document.getElementById('bulk-msg').value.trim();
+  const delay=parseInt(document.getElementById('bulk-delay').value)||2000;
+  if(bulkType==='text'&&!msg){showToast('Enter a message','err');return;}
+  if(bulkType==='template'&&!selTemplate){showToast('Select a template','err');return;}
+  const btn=document.getElementById('bulk-btn');
+  btn.disabled=true;btn.textContent='⏳ Sending…';
+  document.getElementById('s-total').textContent=numbers.length;
+  document.getElementById('s-sent').textContent='0';
+  document.getElementById('s-fail').textContent='0';
+  const log=document.getElementById('bulk-log');log.innerHTML='';
+  let sent=0,failed=0;
+  for(const num of numbers){
+    try{
+      const body={to:num,type:bulkType,delay,...(bulkType==='text'?{message:msg}:{templateName:selTemplate.name,templateLang:selTemplate.lang})};
+      const r=await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const d=await r.json();if(d.error)throw new Error(d.error);
+      sent++;document.getElementById('s-sent').textContent=sent;
+      log.innerHTML+=`<div class="log-ok">✓ ${num}</div>`;
+    }catch(e){
+      failed++;document.getElementById('s-fail').textContent=failed;
+      log.innerHTML+=`<div class="log-err">✗ ${num}: ${e.message}</div>`;
+    }
+    log.scrollTop=log.scrollHeight;
+    await new Promise(r=>setTimeout(r,delay));
+  }
+  btn.disabled=false;btn.textContent='📤 Start Bulk Send';
   showToast(`Done! ${sent} sent, ${failed} failed`);
 }
 
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 loadConvs();
-setInterval(loadConvs, 5000);
+setInterval(loadConvs,5000);
 </script>
 </body>
 </html>
